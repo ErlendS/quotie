@@ -76,7 +76,6 @@ const FrequencyOption = ({ label, value, selected, onPress }) => (
   </TouchableOpacity>
 );
 
-const setInitalTime = () => {
 export class FrequencySelector extends React.Component {
   state = {
     startTime: this.props.initalStartTime || setInitalTime(),
