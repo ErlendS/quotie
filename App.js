@@ -1,6 +1,14 @@
 import React from "react";
-import { StyleSheet, Text, View, Image, TouchableOpacity } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  View,
+  Image,
+  TouchableOpacity,
+  DatePickerIOS
+} from "react-native";
 import { Icon } from "react-native-elements";
+import * as dateFns from "date-fns";
 
 export default class App extends React.Component {
   state = {
@@ -13,7 +21,6 @@ export default class App extends React.Component {
   };
 
   goToSetReminder = () => {
-    console.log("ACTIVATE!");
     this.setState({
       screen: "setReminder"
     });
@@ -32,39 +39,86 @@ export default class App extends React.Component {
       }
     });
   };
-  onSetFrequency = frequency => {
+  onSetFrequency = value => {
     this.setState({
-      frequency
+      frequency: value
     });
   };
-  // Set TouchableOpacity and onPress functionality
-  // figure out how to display checkmark on selected frequency.
 
   render() {
     return this.state.screen === "home" ? (
       <Home setReminder={this.goToSetReminder} />
     ) : (
-      <SetReminder />
+      <FrequencySelector
+        setFrequency={this.onSetFrequency}
+        frequency={this.state.frequency}
+      />
     );
   }
 }
 
-const TimePeriod = ({ title, time }) => (
-  <View style={styles.selectors}>
+const TimePeriod = ({ title, time, onPress }) => (
+  <TouchableOpacity
+    onPress={() => onPress()}
+    style={styles.timeSelectors}
+    activeOpacity={1}
+  >
     <Text style={styles.baseText}>{title}</Text>
     <Text style={styles.baseText}>{time}</Text>
-  </View>
+  </TouchableOpacity>
 );
-const Cycle = ({ period, selected }) => (
-  <View style={styles.selectors}>
-    <Text style={styles.baseText}>Every {period}</Text>
+const FrequencyOption = ({ label, value, selected, onPress }) => (
+  <TouchableOpacity style={styles.selectors} onPress={() => onPress(value)}>
+    <Text style={styles.baseText}>{label}</Text>
     {selected ? (
       <Icon name="check" type="feather" color="#444444" size={15} />
     ) : null}
-  </View>
+  </TouchableOpacity>
 );
-export class SetReminder extends React.Component {
-  cycleOptions = ["30 min", "hour", "2 hrs", "4hrs", "6hrs"];
+
+const setInitalTime = () => {
+export class FrequencySelector extends React.Component {
+  state = {
+    startTime: this.props.initalStartTime || setInitalTime(),
+    endTime: this.props.initalEndTime || dateFns.addHours(setInitalTime(), 12),
+    toggleTimer: {
+      start: false,
+      end: false
+    }
+  };
+
+  toggleWatcher = (value = "start" | "end") => {
+    if (value === "start") {
+      this.setState({ toggleTimer: { start: !this.state.toggleTimer.start } });
+    }
+    if (value === "end") {
+      this.setState({ toggleTimer: { end: !this.state.toggleTimer.end } });
+    }
+  };
+  setStartTime = newTime => this.setState({ startTime: newTime });
+  setEndTime = newTime => this.setState({ endTime: newTime });
+  options = [
+    {
+      label: "Every 30 min",
+      value: 0
+    },
+    {
+      label: "Every hour",
+      value: 1
+    },
+    {
+      label: "Every 2 hrs",
+      value: 2
+    },
+    {
+      label: "Every 4 hrs",
+      value: 3
+    },
+    {
+      label: "Every 6 hrs",
+      value: 4
+    }
+  ];
   render() {
     return (
       <View style={styles.wrapper}>
@@ -81,25 +135,61 @@ export class SetReminder extends React.Component {
         >
           <Text style={styles.title}> Remind Me</Text>
         </View>
-        <View styles={styles.selectorsContainer}>
-          {this.cycleOptions.map((cycleOption, key) => {
-            return <Cycle key={key} period={cycleOption} selected={true} />;
+        <View>
+          {this.options.map((option, key) => {
+            return (
+              <FrequencyOption
+                key={key}
+                label={option.label}
+                value={option.value}
+                onPress={() => {
+                  this.props.setFrequency(option.value);
+                }}
+                selected={this.props.frequency === option.value}
+              />
+            );
           })}
-          <View
-            style={{
-              height: 100,
-              width: "100%",
-              alignItems: "center",
-              justifyContent: "center",
-              borderBottomWidth: 1,
-              borderBottomColor: "#C4C4C4"
-            }}
-          >
-            <Text style={styles.subTitle}> From</Text>
-          </View>
-          <TimePeriod title="Start" time="09:00" />
-          <TimePeriod title="End" time="22:00" />
         </View>
+        <View
+          style={{
+            height: 100,
+            width: "100%",
+            alignItems: "center",
+            justifyContent: "center"
+          }}
+        >
+          <Text style={styles.subTitle}> From</Text>
+        </View>
+        <TimePeriod
+          title="Start"
+          time={dateFns.format(this.state.startTime, "HH:mm")}
+          onPress={() => {
+            this.toggleWatcher("start");
+          }}
+        />
+        {this.state.toggleTimer.start && (
+          <DatePickerIOS
+            date={this.state.startTime}
+            onDateChange={this.setStartTime}
+            mode="time"
+            minuteInterval="10"
+          />
+        )}
+        <TimePeriod
+          title="End"
+          time={dateFns.format(this.state.endTime, "HH:mm")}
+          onPress={() => {
+            this.toggleWatcher("end");
+          }}
+        />
+        {this.state.toggleTimer.end && (
+          <DatePickerIOS
+            date={this.state.endTime}
+            onDateChange={this.setEndTime}
+            mode="time"
+            minuteInterval="10"
+          />
+        )}
       </View>
     );
   }
@@ -211,9 +301,22 @@ const styles = StyleSheet.create({
     borderBottomColor: "#C4C4C4",
     paddingHorizontal: 16
   },
+  timeSelectors: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    fontSize: 16,
+    backgroundColor: "#FFFFFF",
+    height: 50,
+    borderTopWidth: 1,
+    borderTopColor: "#C4C4C4",
+    paddingHorizontal: 16
+  },
   wrapper: {
     flex: 1,
     backgroundColor: "#F6F6F6",
-    fontFamily: "Cochin"
+    fontFamily: "Cochin",
+    borderBottomWidth: 1,
+    borderBottomColor: "#C4C4C4"
   }
 });
