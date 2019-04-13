@@ -52,6 +52,7 @@ export default class App extends React.Component {
       <FrequencySelector
         setFrequency={this.onSetFrequency}
         frequency={this.state.frequency}
+        backToHome={this.onBackToHome}
       />
     );
   }
@@ -76,6 +77,65 @@ const FrequencyOption = ({ label, value, selected, onPress }) => (
   </TouchableOpacity>
 );
 
+const PrimaryButton = ({ text, icon, onPress }) => (
+  <View
+    style={{
+      height: "15%",
+      width: "100%",
+      alignItems: "center"
+    }}
+  >
+    <TouchableOpacity
+      style={styles.buttonStyle}
+      onPress={onPress}
+      activeOpacity={0.4}
+    >
+      {icon ? (
+        <View
+          style={{
+            width: 30
+          }}
+        />
+      ) : null}
+      <Text style={{ textAlign: "center", flexGrow: 1 }}>{text}</Text>
+      {icon}
+    </TouchableOpacity>
+  </View>
+);
+
+const TopNav = ({ leftIcon, centerText, rightIcon }) => {
+  const placeholder = (
+    <View
+      style={{
+        width: 30
+      }}
+    />
+  );
+  return (
+    <View
+      style={{
+        marginTop: 44,
+        height: 100,
+        flexDirection: "row",
+        width: "100%",
+        alignItems: "center",
+        justifyContent: "space-around"
+      }}
+    >
+      {leftIcon ? leftIcon : placeholder}
+      <Text style={styles.title}> {centerText}</Text>
+      {rightIcon ? rightIcon : placeholder}
+    </View>
+  );
+};
+
+const setInitalTime = () => {
+  const currentTime = dateFns.startOfHour(new Date());
+  const offsetTime = dateFns.getHours(dateFns.subHours(currentTime, 9));
+  const initalTime = dateFns.subHours(currentTime, offsetTime);
+  return initalTime;
+};
+
 export class FrequencySelector extends React.Component {
   state = {
     startTime: this.props.initalStartTime || setInitalTime(),
@@ -88,10 +148,14 @@ export class FrequencySelector extends React.Component {
 
   toggleWatcher = (value = "start" | "end") => {
     if (value === "start") {
-      this.setState({ toggleTimer: { start: !this.state.toggleTimer.start } });
+      this.setState({
+        toggleTimer: { start: !this.state.toggleTimer.start, end: false }
+      });
     }
     if (value === "end") {
-      this.setState({ toggleTimer: { end: !this.state.toggleTimer.end } });
+      this.setState({
+        toggleTimer: { end: !this.state.toggleTimer.end, start: false }
+      });
     }
   };
   setStartTime = newTime => this.setState({ startTime: newTime });
@@ -112,29 +176,29 @@ export class FrequencySelector extends React.Component {
     {
       label: "Every 4 hrs",
       value: 3
-    },
-    {
-      label: "Every 6 hrs",
-      value: 4
     }
+    // {
+    //   label: "Every 6 hrs",
+    //   value: 4
+    // }
   ];
   render() {
     return (
       <View style={styles.wrapper}>
-        <View
-          style={{
-            height: 100,
-            marginTop: 44,
-            width: "100%",
-            alignItems: "center",
-            justifyContent: "center",
-            borderBottomWidth: 1,
-            borderBottomColor: "#C4C4C4"
-          }}
-        >
-          <Text style={styles.title}> Remind Me</Text>
-        </View>
-        <View>
+        <TopNav
+          leftIcon={
+            <TouchableOpacity onPress={this.props.backToHome}>
+              <Icon
+                name="chevron-left"
+                type="feather"
+                color="#444444"
+                size={30}
+              />
+            </TouchableOpacity>
+          }
+          centerText="Remind Me"
+        />
+        <View style={{ borderTopWidth: 1, borderTopColor: "#C4C4C4" }}>
           {this.options.map((option, key) => {
             return (
               <FrequencyOption
@@ -159,36 +223,79 @@ export class FrequencySelector extends React.Component {
         >
           <Text style={styles.subTitle}> From</Text>
         </View>
-        <TimePeriod
-          title="Start"
-          time={dateFns.format(this.state.startTime, "HH:mm")}
-          onPress={() => {
-            this.toggleWatcher("start");
+        <View
+          style={{
+            marginBottom: 60,
+            borderBottomWidth: 1,
+            borderBottomColor: "#C4C4C4"
           }}
-        />
-        {this.state.toggleTimer.start && (
-          <DatePickerIOS
-            date={this.state.startTime}
-            onDateChange={this.setStartTime}
-            mode="time"
-            minuteInterval="10"
+        >
+          <TimePeriod
+            title="Start"
+            time={dateFns.format(this.state.startTime, "HH:mm")}
+            onPress={() => {
+              this.toggleWatcher("start");
+            }}
           />
-        )}
-        <TimePeriod
-          title="End"
-          time={dateFns.format(this.state.endTime, "HH:mm")}
-          onPress={() => {
-            this.toggleWatcher("end");
-          }}
-        />
-        {this.state.toggleTimer.end && (
-          <DatePickerIOS
-            date={this.state.endTime}
-            onDateChange={this.setEndTime}
-            mode="time"
-            minuteInterval="10"
+          {this.state.toggleTimer.start && (
+            <React.Fragment>
+              <DatePickerIOS
+                style={styles.datePickerStyle}
+                date={this.state.startTime}
+                onDateChange={this.setStartTime}
+                mode="time"
+                minuteInterval="10"
+              />
+              <TouchableOpacity
+                style={styles.datePickerButton}
+                activeOpacity={0.8}
+                onPress={() => {
+                  this.toggleWatcher("start");
+                }}
+              >
+                <Text style={styles.datePickerButtonText}> Confirm </Text>
+              </TouchableOpacity>
+            </React.Fragment>
+          )}
+          <TimePeriod
+            title="End"
+            time={dateFns.format(this.state.endTime, "HH:mm")}
+            onPress={() => {
+              this.toggleWatcher("end");
+            }}
           />
-        )}
+          {this.state.toggleTimer.end && (
+            <React.Fragment>
+              <DatePickerIOS
+                style={styles.datePickerStyle}
+                date={this.state.endTime}
+                onDateChange={this.setEndTime}
+                mode="time"
+                minuteInterval="10"
+              />
+              <TouchableOpacity
+                style={styles.datePickerButton}
+                activeOpacity={0.8}
+                onPress={() => {
+                  this.toggleWatcher("end");
+                }}
+              >
+                <Text style={styles.datePickerButtonText}> Confirm </Text>
+              </TouchableOpacity>
+            </React.Fragment>
+          )}
+        </View>
+        <PrimaryButton
+          text={"Set Reminder"}
+          onPress={() =>
+            console.log(
+              "the state is ====",
+              this.state.startTime,
+              "and end time is =====",
+              this.state.endTime
+            )
+          }
+        />
       </View>
     );
   }
@@ -197,17 +304,7 @@ export class Home extends React.Component {
   render() {
     return (
       <View style={styles.container}>
-        <View
-          style={{
-            height: 100,
-            marginTop: 44,
-            width: "100%",
-            alignItems: "center",
-            justifyContent: "center"
-          }}
-        >
-          <Text style={styles.title}> Daily Stoic</Text>
-        </View>
+        <TopNav centerText="Daily Stoic" />
         <View
           style={{
             flexGrow: 2,
@@ -220,34 +317,18 @@ export class Home extends React.Component {
             style={{ width: 279, height: 420 }}
           />
         </View>
-        <View
-          style={{
-            height: "15%",
-            width: "100%",
-            alignItems: "center"
-          }}
-        >
-          <TouchableOpacity
-            style={styles.buttonStyle}
-            onPress={this.props.setReminder}
-            activeOpacity={0.4}
-          >
-            <View
-              style={{
-                width: 30
-              }}
-            />
-            <Text style={{ textAlign: "center", flexGrow: 1 }}>
-              Set Reminder
-            </Text>
+        <PrimaryButton
+          text="Set Reminder"
+          icon={
             <Icon
               name="chevron-right"
               type="feather"
               color="#444444"
               size={30}
             />
-          </TouchableOpacity>
-        </View>
+          }
+          onPress={this.props.setReminder}
+        />
       </View>
     );
   }
@@ -317,5 +398,22 @@ const styles = StyleSheet.create({
     fontFamily: "Cochin",
     borderBottomWidth: 1,
     borderBottomColor: "#C4C4C4"
+  },
+  datePickerButton: {
+    alignItems: "center",
+    justifyContent: "center",
+    height: 51,
+    borderTopWidth: 1,
+    borderTopColor: "#C4C4C4",
+    borderBottomWidth: 1,
+    borderBottomColor: "#C4C4C4"
+  },
+  datePickerButtonText: {
+    fontWeight: "600",
+    color: "#444444"
+  },
+  datePickerStyle: {
+    borderTopWidth: 1,
+    borderTopColor: "#C4C4C4"
   }
 });
