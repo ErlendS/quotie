@@ -8,38 +8,30 @@ import {
   DatePickerIOS
 } from "react-native";
 import { Permissions, Notifications } from "expo";
+import Expo from "expo-server-sdk";
 
 import { Icon } from "react-native-elements";
 import * as dateFns from "date-fns";
 
 const PUSH_ENDPOINT = "https://your-server.com/users/push-token";
 
-async function registerForPushNotificationsAsync() {
+async function registerForPushNotificationsAsync(setUserNotificationRequest) {
   const { status: existingStatus } = await Permissions.getAsync(
     Permissions.NOTIFICATIONS
   );
   let finalStatus = existingStatus;
 
-  // only ask if permissions have not already been determined, because
-  // iOS won't necessarily prompt the user a second time.
   if (existingStatus !== "granted") {
-    // Android remote notification permissions are granted during the app
-    // install, so this will only ask on iOS
     const { status } = await Permissions.askAsync(Permissions.NOTIFICATIONS);
     finalStatus = status;
   }
-
-  // Stop here if the user did not grant permissions
   if (finalStatus !== "granted") {
     return;
   }
-
   // Get the token that uniquely identifies this device
   let token = await Notifications.getExpoPushTokenAsync();
 
   // POST the token to your backend server from where you can retrieve it to send push notifications.
-
-  // ADD FIREBASE ENDPOINT, SET UP BODY WITH CORRECT DATA
   return fetch(PUSH_ENDPOINT, {
     method: "POST",
     headers: {
@@ -50,12 +42,13 @@ async function registerForPushNotificationsAsync() {
       token: {
         value: token
       },
-      user: {
-        username: "Brent"
+      value: {
+        setUserNotificationRequest
       }
     })
   });
 }
+
 export default class App extends React.Component {
   state = {
     screen: "home",
@@ -333,7 +326,9 @@ export class FrequencySelector extends React.Component {
         </View>
         <PrimaryButton
           text={"Set Reminder"}
-          onPress={() => registerForPushNotificationsAsync()}
+          onPress={() =>
+            registerForPushNotificationsAsync(setUserNotificationRequest)
+          }
         />
       </View>
     );
