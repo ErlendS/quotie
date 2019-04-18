@@ -8,14 +8,38 @@ import {
   DatePickerIOS
 } from "react-native";
 import { Permissions, Notifications } from "expo";
-import Expo from "expo-server-sdk";
-
+// import Expo from "expo-server-sdk";
 import { Icon } from "react-native-elements";
+import firebase from "firebase";
+import firestore from "firebase/firestore";
 import * as dateFns from "date-fns";
+
+import quotes from "./quotes";
+
+firebase.initializeApp({
+  apiKey: "AIzaSyAIDZczRImlV5qrPgOlZUcDcKw3wG0iC2A",
+  authDomain: "quotie-quotie.firebaseapp.com",
+  databaseURL: "https://quotie-quotie.firebaseio.com",
+  projectId: "quotie-quotie",
+  storageBucket: "quotie-quotie.appspot.com",
+  messagingSenderId: "256815436581"
+});
+
+var db = firebase.firestore();
+
+function importQuotes() {
+  quotes.map(quoteObj =>
+    db
+      .collection("quotes")
+      .add(quoteObj)
+      .then(docRef => console.log("Document written with ID:", docRef.id))
+      .catch(err => console.error("Error adding document: ", err))
+  );
+}
 
 const PUSH_ENDPOINT = "https://your-server.com/users/push-token";
 
-async function registerForPushNotificationsAsync(setUserNotificationRequest) {
+async function registerForPushNotificationsAsync(userNotificationRequest) {
   const { status: existingStatus } = await Permissions.getAsync(
     Permissions.NOTIFICATIONS
   );
@@ -32,30 +56,32 @@ async function registerForPushNotificationsAsync(setUserNotificationRequest) {
   let token = await Notifications.getExpoPushTokenAsync();
 
   // POST the token to your backend server from where you can retrieve it to send push notifications.
-  return fetch(PUSH_ENDPOINT, {
-    method: "POST",
-    headers: {
-      Accept: "application/json",
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      token: {
-        value: token
-      },
-      value: {
-        setUserNotificationRequest
-      }
-    })
-  });
+  // return fetch(PUSH_ENDPOINT, {
+  //   method: "POST",
+  //   headers: {
+  //     Accept: "application/json",
+  //     "Content-Type": "application/json"
+  //   },
+  //   body: JSON.stringify({
+  //     token: {
+  //       value: token
+  //     },
+  //     value: {
+  //       setUserNotificationRequest
+  //     }
+  //   })
+  // });
+
+  // send data to firebase. userID = token.
+  db.collection("users")
+    .doc(token)
+    .set({ userNotificationRequest }, { merge: true })
+    .catch(err => console.error("Error adding document: ", err));
 }
 
 export default class App extends React.Component {
   state = {
     screen: "home",
-    cycle: {
-      start: "09:00",
-      end: "22:00"
-    },
     frequency: 1
   };
 
@@ -70,29 +96,11 @@ export default class App extends React.Component {
     });
   };
 
-  onSetCycle = (start, end) => {
-    this.setState({
-      cycle: {
-        start,
-        end
-      }
-    });
-  };
-  onSetFrequency = value => {
-    this.setState({
-      frequency: value
-    });
-  };
-
   render() {
     return this.state.screen === "home" ? (
       <Home setReminder={this.goToSetReminder} />
     ) : (
-      <FrequencySelector
-        setFrequency={this.onSetFrequency}
-        frequency={this.state.frequency}
-        backToHome={this.onBackToHome}
-      />
+      <FrequencySelector backToHome={this.onBackToHome} />
     );
   }
 }
@@ -174,7 +182,7 @@ const setInitalTime = () => {
   const initalTime = dateFns.subHours(currentTime, offsetTime);
   return initalTime;
 };
-
+//-------------------------------------------------------------------------------------------------------------------------------------------
 export class FrequencySelector extends React.Component {
   state = {
     startTime: this.props.initalStartTime || setInitalTime(),
@@ -182,8 +190,16 @@ export class FrequencySelector extends React.Component {
     toggleTimer: {
       start: false,
       end: false
-    }
+    },
+    frequency: 60
   };
+
+  getPayload = () => ({
+    startTime: this.state.startTime,
+    endTime: this.state.endTime,
+    frequency: this.state.frequency,
+    subscriptionIsOn: true
+  });
 
   toggleWatcher = (value = "start" | "end") => {
     if (value === "start") {
@@ -197,28 +213,36 @@ export class FrequencySelector extends React.Component {
       });
     }
   };
+
   setStartTime = newTime => this.setState({ startTime: newTime });
   setEndTime = newTime => this.setState({ endTime: newTime });
+
+  onSetFrequency = value => {
+    this.setState({
+      frequency: value
+    });
+  };
+
   options = [
     {
       label: "Every 30 min",
-      value: 0
+      value: 30
     },
     {
       label: "Every hour",
-      value: 1
+      value: 60
     },
     {
       label: "Every 2 hrs",
-      value: 2
+      value: 120
     },
     {
       label: "Every 4 hrs",
-      value: 3
+      value: 240
     }
     // {
     //   label: "Every 6 hrs",
-    //   value: 4
+    //   value: 360
     // }
   ];
   render() {
@@ -245,9 +269,9 @@ export class FrequencySelector extends React.Component {
                 label={option.label}
                 value={option.value}
                 onPress={() => {
-                  this.props.setFrequency(option.value);
+                  this.onSetFrequency(option.value);
                 }}
-                selected={this.props.frequency === option.value}
+                selected={this.state.frequency === option.value}
               />
             );
           })}
@@ -326,9 +350,7 @@ export class FrequencySelector extends React.Component {
         </View>
         <PrimaryButton
           text={"Set Reminder"}
-          onPress={() =>
-            registerForPushNotificationsAsync(setUserNotificationRequest)
-          }
+          onPress={() => registerForPushNotificationsAsync(this.getPayload())}
         />
       </View>
     );

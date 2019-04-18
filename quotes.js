@@ -1,4 +1,4 @@
-const quotes = [
+export default (quotes = [
   {
     author: "Epictetus",
     text: `Make the best use of what is in your power, and take the rest as it happens.`
@@ -497,4 +497,4 @@ const quotes = [
     text:
       "Because a thing seems difficult for you, do not think it impossible for anyone to accomplish."
   }
-];
+]);
