@@ -5,7 +5,8 @@ import {
   View,
   Image,
   TouchableOpacity,
-  DatePickerIOS
+  DatePickerIOS,
+  ScrollView
 } from "react-native";
 import { Permissions, Notifications } from "expo";
 // import Expo from "expo-server-sdk";
@@ -15,17 +16,7 @@ import firestore from "firebase/firestore";
 import * as dateFns from "date-fns";
 
 import quotes from "./quotes";
-
-firebase.initializeApp({
-  apiKey: "AIzaSyAIDZczRImlV5qrPgOlZUcDcKw3wG0iC2A",
-  authDomain: "quotie-quotie.firebaseapp.com",
-  databaseURL: "https://quotie-quotie.firebaseio.com",
-  projectId: "quotie-quotie",
-  storageBucket: "quotie-quotie.appspot.com",
-  messagingSenderId: "256815436581"
-});
-
-var db = firebase.firestore();
+import db from "./firebase";
 
 function importQuotes() {
   quotes.map(quoteObj =>
@@ -39,7 +30,10 @@ function importQuotes() {
 
 const PUSH_ENDPOINT = "https://your-server.com/users/push-token";
 
-async function registerForPushNotificationsAsync(userNotificationRequest) {
+async function registerForPushNotificationsAsync(
+  userNotificationRequest,
+  onSuccess
+) {
   const { status: existingStatus } = await Permissions.getAsync(
     Permissions.NOTIFICATIONS
   );
@@ -52,7 +46,6 @@ async function registerForPushNotificationsAsync(userNotificationRequest) {
   if (finalStatus !== "granted") {
     return;
   }
-  // Get the token that uniquely identifies this device
   let token = await Notifications.getExpoPushTokenAsync();
 
   // POST the token to your backend server from where you can retrieve it to send push notifications.
@@ -72,17 +65,54 @@ async function registerForPushNotificationsAsync(userNotificationRequest) {
   //   })
   // });
 
-  // send data to firebase. userID = token.
   db.collection("users")
     .doc(token)
     .set({ userNotificationRequest }, { merge: true })
+    .then(() => onSuccess())
     .catch(err => console.error("Error adding document: ", err));
 }
 
 export default class App extends React.Component {
   state = {
     screen: "home",
-    frequency: 1
+    payload: {
+      startTime: this.props.initalStartTime || setInitalTime(),
+      endTime:
+        this.props.initalEndTime || dateFns.addHours(setInitalTime(), 12),
+      frequency: 60
+    },
+    frequencyOptions: [
+      {
+        label: "Every 30 min",
+        value: 30
+      },
+      {
+        label: "Every hour",
+        value: 60
+      },
+      {
+        label: "Every 2 hrs",
+        value: 120
+      },
+      {
+        label: "Every 4 hrs",
+        value: 240
+      }
+      // {
+      //   label: "Every 6 hrs",
+      //   value: 360
+      // }
+    ]
+  };
+  setStartTime = newTime =>
+    this.setState({ payload: { ...this.state.payload, startTime: newTime } });
+  setEndTime = newTime =>
+    this.setState({ payload: { ...this.state.payload, endTime: newTime } });
+
+  setFrequency = value => {
+    this.setState({
+      payload: { ...this.state.payload, frequency: value }
+    });
   };
 
   goToSetReminder = () => {
@@ -95,13 +125,40 @@ export default class App extends React.Component {
       screen: "home"
     });
   };
+  goToSuccessScreen = () => {
+    this.setState({
+      screen: "successScreen"
+    });
+  };
 
   render() {
-    return this.state.screen === "home" ? (
-      <Home setReminder={this.goToSetReminder} />
-    ) : (
-      <FrequencySelector backToHome={this.onBackToHome} />
-    );
+    if (this.state.screen === "home") {
+      return <Home setReminder={this.goToSetReminder} />;
+    }
+    if (this.state.screen === "setReminder") {
+      return (
+        <FrequencySelector
+          backToHome={this.onBackToHome}
+          goToSuccessScreen={this.goToSuccessScreen}
+          setStartTime={this.setStartTime}
+          setEndTime={this.setEndTime}
+          setFrequency={this.setFrequency}
+          frequencyOptions={this.state.frequencyOptions}
+          payload={this.state.payload}
+        />
+      );
+    }
+    if (this.state.screen === "successScreen") {
+      return (
+        <SuccessScreen
+          goToSetReminder={this.goToSetReminder}
+          frequencyOptions={this.state.frequencyOptions}
+          payload={this.state.payload}
+        />
+      );
+    } else {
+      return <Home setReminder={this.goToSetReminder} />;
+    }
   }
 }
 
@@ -185,19 +242,16 @@ const setInitalTime = () => {
 //-------------------------------------------------------------------------------------------------------------------------------------------
 export class FrequencySelector extends React.Component {
   state = {
-    startTime: this.props.initalStartTime || setInitalTime(),
-    endTime: this.props.initalEndTime || dateFns.addHours(setInitalTime(), 12),
     toggleTimer: {
       start: false,
       end: false
-    },
-    frequency: 60
+    }
   };
 
   getPayload = () => ({
-    startTime: this.state.startTime,
-    endTime: this.state.endTime,
-    frequency: this.state.frequency,
+    startTime: this.props.payload.startTime,
+    endTime: this.props.payload.endTime,
+    frequency: this.props.payload.frequency,
     subscriptionIsOn: true
   });
 
@@ -214,40 +268,9 @@ export class FrequencySelector extends React.Component {
     }
   };
 
-  setStartTime = newTime => this.setState({ startTime: newTime });
-  setEndTime = newTime => this.setState({ endTime: newTime });
-
-  onSetFrequency = value => {
-    this.setState({
-      frequency: value
-    });
-  };
-
-  options = [
-    {
-      label: "Every 30 min",
-      value: 30
-    },
-    {
-      label: "Every hour",
-      value: 60
-    },
-    {
-      label: "Every 2 hrs",
-      value: 120
-    },
-    {
-      label: "Every 4 hrs",
-      value: 240
-    }
-    // {
-    //   label: "Every 6 hrs",
-    //   value: 360
-    // }
-  ];
   render() {
     return (
-      <View style={styles.wrapper}>
+      <ScrollView style={styles.wrapper}>
         <TopNav
           leftIcon={
             <TouchableOpacity onPress={this.props.backToHome}>
@@ -262,16 +285,16 @@ export class FrequencySelector extends React.Component {
           centerText="Remind Me"
         />
         <View style={{ borderTopWidth: 1, borderTopColor: "#C4C4C4" }}>
-          {this.options.map((option, key) => {
+          {this.props.frequencyOptions.map((option, key) => {
             return (
               <FrequencyOption
                 key={key}
                 label={option.label}
                 value={option.value}
                 onPress={() => {
-                  this.onSetFrequency(option.value);
+                  this.props.setFrequency(option.value);
                 }}
-                selected={this.state.frequency === option.value}
+                selected={this.props.payload.frequency === option.value}
               />
             );
           })}
@@ -295,7 +318,7 @@ export class FrequencySelector extends React.Component {
         >
           <TimePeriod
             title="Start"
-            time={dateFns.format(this.state.startTime, "HH:mm")}
+            time={dateFns.format(this.props.payload.startTime, "HH:mm")}
             onPress={() => {
               this.toggleWatcher("start");
             }}
@@ -304,8 +327,8 @@ export class FrequencySelector extends React.Component {
             <React.Fragment>
               <DatePickerIOS
                 style={styles.datePickerStyle}
-                date={this.state.startTime}
-                onDateChange={this.setStartTime}
+                date={this.props.payload.startTime}
+                onDateChange={this.props.setStartTime}
                 mode="time"
                 minuteInterval="10"
               />
@@ -322,7 +345,7 @@ export class FrequencySelector extends React.Component {
           )}
           <TimePeriod
             title="End"
-            time={dateFns.format(this.state.endTime, "HH:mm")}
+            time={dateFns.format(this.props.payload.endTime, "HH:mm")}
             onPress={() => {
               this.toggleWatcher("end");
             }}
@@ -331,8 +354,8 @@ export class FrequencySelector extends React.Component {
             <React.Fragment>
               <DatePickerIOS
                 style={styles.datePickerStyle}
-                date={this.state.endTime}
-                onDateChange={this.setEndTime}
+                date={this.props.payload.endTime}
+                onDateChange={this.props.setEndTime}
                 mode="time"
                 minuteInterval="10"
               />
@@ -350,9 +373,14 @@ export class FrequencySelector extends React.Component {
         </View>
         <PrimaryButton
           text={"Set Reminder"}
-          onPress={() => registerForPushNotificationsAsync(this.getPayload())}
+          onPress={() =>
+            registerForPushNotificationsAsync(
+              this.getPayload(),
+              this.props.goToSuccessScreen
+            )
+          }
         />
-      </View>
+      </ScrollView>
     );
   }
 }
@@ -385,6 +413,63 @@ export class Home extends React.Component {
           }
           onPress={this.props.setReminder}
         />
+      </View>
+    );
+  }
+}
+export class SuccessScreen extends React.Component {
+  stringifyFrequency = frequency => {
+    if (frequency === 30) return "30 minutes";
+    if (frequency === 60) return "hour";
+    if (frequency === 120) return "2 hrs";
+    if (frequency === 240) return "4 hrs";
+  };
+  render() {
+    console.log(this.props.payload.startTime);
+    return (
+      <View style={styles.container}>
+        <TopNav centerText="Daily Stoic" />
+        <View
+          style={{
+            flexGrow: 1,
+            justifyContent: "center",
+            alignItems: "center"
+          }}
+        >
+          <Image
+            source={require("./assets/statue_head.png")}
+            style={{ width: 279, height: 420 }}
+          />
+        </View>
+        <View style={{ flexGrow: 1 }}>
+          <Text
+            style={{
+              marginBottom: 30,
+              textAlign: "center",
+              fontSize: 16,
+              color: "#444444"
+            }}
+            children={
+              "Reminder set every " +
+              this.stringifyFrequency(this.props.payload.frequency) +
+              " from " +
+              dateFns.format(this.props.payload.startTime, "HH:mm") +
+              " to " +
+              dateFns.format(this.props.payload.endTime, "HH:mm")
+            }
+          />
+          <Text
+            style={{
+              textDecorationLine: "underline",
+              textAlign: "center",
+              fontSize: 18,
+              color: "#444444"
+            }}
+            onPress={this.props.goToSetReminder}
+          >
+            Edit
+          </Text>
+        </View>
       </View>
     );
   }
@@ -452,8 +537,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#F6F6F6",
     fontFamily: "Cochin",
-    borderBottomWidth: 1,
-    borderBottomColor: "#C4C4C4"
+    paddingBottom: 50
   },
   datePickerButton: {
     alignItems: "center",
