@@ -425,7 +425,6 @@ export class SuccessScreen extends React.Component {
     if (frequency === 240) return "4 hrs";
   };
   render() {
-    console.log(this.props.payload.startTime);
     return (
       <View style={styles.container}>
         <TopNav centerText="Daily Stoic" />
