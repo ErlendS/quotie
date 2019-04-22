@@ -9,10 +9,7 @@ import {
   ScrollView
 } from "react-native";
 import { Permissions, Notifications } from "expo";
-// import Expo from "expo-server-sdk";
 import { Icon } from "react-native-elements";
-import firebase from "firebase";
-import firestore from "firebase/firestore";
 import * as dateFns from "date-fns";
 
 import quotes from "./quotes";
@@ -28,7 +25,8 @@ function importQuotes() {
   );
 }
 
-const PUSH_ENDPOINT = "https://your-server.com/users/push-token";
+const PUSH_ENDPOINT =
+  "https://europe-west1-quotie-quotie.cloudfunctions.net/setSubscription";
 
 async function registerForPushNotificationsAsync(
   userNotificationRequest,
@@ -48,28 +46,21 @@ async function registerForPushNotificationsAsync(
   }
   let token = await Notifications.getExpoPushTokenAsync();
 
-  // POST the token to your backend server from where you can retrieve it to send push notifications.
-  // return fetch(PUSH_ENDPOINT, {
-  //   method: "POST",
-  //   headers: {
-  //     Accept: "application/json",
-  //     "Content-Type": "application/json"
-  //   },
-  //   body: JSON.stringify({
-  //     token: {
-  //       value: token
-  //     },
-  //     value: {
-  //       setUserNotificationRequest
-  //     }
-  //   })
-  // });
-
-  db.collection("users")
-    .doc(token)
-    .set({ userNotificationRequest }, { merge: true })
-    .then(() => onSuccess())
-    .catch(err => console.error("Error adding document: ", err));
+  const response = await fetch(PUSH_ENDPOINT, {
+    method: "POST",
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      token,
+      data: userNotificationRequest
+    })
+  });
+  console.log("respone is:", response.ok);
+  if (response.ok) {
+    return onSuccess();
+  } else return;
 }
 
 export default class App extends React.Component {
