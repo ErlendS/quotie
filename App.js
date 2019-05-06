@@ -28,6 +28,23 @@ function importQuotes() {
 const PUSH_ENDPOINT =
   "https://europe-west1-quotie-quotie.cloudfunctions.net/setSubscription";
 
+const PUSH_ENDPOINT2 =
+  "https://europe-west1-quotie-quotie.cloudfunctions.net/sendNotificationToSubscribedMembers";
+
+async function testFn() {
+  await fetch(PUSH_ENDPOINT2, {
+    method: "GET",
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json"
+    }
+    // body: JSON.stringify({
+    //   token,
+    //   data: "userNotificationRequest"
+    // })
+  });
+}
+
 async function registerForPushNotificationsAsync(
   userNotificationRequest,
   onSuccess
@@ -371,6 +388,7 @@ export class FrequencySelector extends React.Component {
             )
           }
         />
+        <PrimaryButton text={"TestButton"} onPress={() => testFn()} />
       </ScrollView>
     );
   }
