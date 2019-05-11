@@ -1,9 +1,6 @@
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
-// import * as dateFns from "date-fns";
 const dateFns = require("date-fns");
-
-// import { Expo } from "expo-server-sdk";
 const { Expo } = require("expo-server-sdk");
 
 let expo = new Expo();
@@ -97,12 +94,11 @@ async function getQuoteAndUsersToNotify() {
     })
     .catch(err => err);
 }
-exports.sendNotificationToSubscribedMembers = functions
+
+exports.scheduledPushNotifications = functions
   .region("europe-west1")
-  .https.onRequest(async (req, res) => {
-    console.log(
-      "--------sendNotificationToSubscribedMembers activated--------"
-    );
+  .pubsub.schedule(`every 5 minutes`)
+  .onRun(async context => {
     try {
       const [quoteObj, userTokens] = await getQuoteAndUsersToNotify();
       let messages = [];
@@ -123,25 +119,18 @@ exports.sendNotificationToSubscribedMembers = functions
       console.log("messages is: ", messages);
       let chunks = expo.chunkPushNotifications(messages);
       let tickets = [];
-      (async () => {
-        for (let chunk of chunks) {
-          try {
-            let ticketChunk = await expo.sendPushNotificationsAsync(chunk);
-            console.log("ticketchunk is ", ticketChunk);
-            tickets.push(...ticketChunk);
-          } catch (error) {
-            console.error(error);
-          }
+      for (let chunk of chunks) {
+        try {
+          let ticketChunk = await expo.sendPushNotificationsAsync(chunk);
+          console.log("ticketchunk is ", ticketChunk);
+          tickets.push(...ticketChunk);
+        } catch (error) {
+          console.error(error);
         }
-      })();
+      }
+      return res.status(200).send();
     } catch (error) {
       console.error(error);
+      return res.status(500).send();
     }
   });
-
-// set up cron job to run the function every 10 minutes
-
-// shouldUserBeNotfied(current_zulu_time, userSubscription) {
-//  dateFnsAddMiniutes until you are above endTime
-//  const whenToNotify = userSubscription.startTime
-// )})
