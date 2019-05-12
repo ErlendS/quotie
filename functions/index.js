@@ -87,7 +87,7 @@ async function getRandomQuote() {
 }
 
 async function getQuoteAndUsersToNotify() {
-  const dateObj = new Date(2019, 4, 27, 12, 0, 0);
+  const dateObj = dateFns.startOfMinute(new Date());
   return Promise.all([getRandomQuote(), getActiveUserTokens(dateObj)])
     .then(data => {
       return data;
@@ -97,7 +97,7 @@ async function getQuoteAndUsersToNotify() {
 
 exports.scheduledPushNotifications = functions
   .region("europe-west1")
-  .pubsub.schedule(`every 5 minutes`)
+  .pubsub.schedule(`every 10 minutes synchronized`)
   .onRun(async context => {
     try {
       const [quoteObj, userTokens] = await getQuoteAndUsersToNotify();
@@ -128,9 +128,7 @@ exports.scheduledPushNotifications = functions
           console.error(error);
         }
       }
-      return res.status(200).send();
     } catch (error) {
       console.error(error);
-      return res.status(500).send();
     }
   });
