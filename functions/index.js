@@ -43,15 +43,15 @@ async function getActiveUserTokens(dateObj) {
         let whenToNotify = [];
         let currentTime = startTime;
         while (
-          dateFns.isBefore(
-            currentTime,
-            endTime || dateFns.isEqual(currentTime, endTime)
-          )
+          dateFns.isBefore(currentTime, endTime) ||
+          dateFns.isEqual(currentTime, endTime)
         ) {
           whenToNotify.push(currentTime);
           currentTime = dateFns.addMinutes(currentTime, frequency);
         }
         const shouldBeNotified = whenToNotify.find(date => {
+          console.log("when to notify", whenToNotify);
+          console.log("the time is ", date, "the dateObj is", dateObj);
           return (
             dateFns.format(date, "HH:mm") === dateFns.format(dateObj, "HH:mm")
           );
@@ -78,7 +78,6 @@ async function getRandomQuote() {
     .then(querySnapshot => {
       const int = getRandomInt(querySnapshot.size);
       const randomQuote = querySnapshot.docs[int].data();
-      console.log("returning random quote!");
       return randomQuote;
     })
     .catch(error => {
@@ -94,6 +93,28 @@ async function getQuoteAndUsersToNotify() {
     })
     .catch(err => err);
 }
+
+exports.getUserNotificationSettings = functions
+  .region("europe-west1")
+  .https.onRequest((req, res) => {
+    const payload = req.body;
+    console.log("body is", payload);
+
+    return admin
+      .firestore()
+      .collection("users")
+      .doc(payload.token)
+      .get()
+      .then(doc => {
+        if (doc) {
+          return doc;
+        } else {
+          console.log("No such document!");
+          return null;
+        }
+      })
+      .catch(err => console.error(err));
+  });
 
 exports.scheduledPushNotifications = functions
   .region("europe-west1")
