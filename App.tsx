@@ -1,11 +1,11 @@
 import React from "react";
 import * as dateFns from "date-fns";
-// import Tabs from '@material-ui/core/Tabs';
-// import Tab from '@material-ui/core/Tab';
 
 import { UserDataT, ScreensT } from "./types";
-import FrequencySelector from "./ReminderScreen";
-import Home from "./Home";
+import SetReminderScreen from "./Screens/SetReminderScreen";
+import Home from "./Screens/Home";
+import SetFrequency from "./Screens/SetFrequency";
+import SetBetween from "./Screens/SetBetweenScreen";
 
 const setInitalTime = () => {
   const currentTime = dateFns.startOfHour(new Date());
@@ -13,25 +13,6 @@ const setInitalTime = () => {
   const initalTime = dateFns.subHours(currentTime, offsetTime);
   return initalTime;
 };
-
-const frequencyOptions = [
-  {
-    label: "Every hour",
-    value: 60
-  },
-  {
-    label: "Every 2 hrs",
-    value: 120
-  },
-  {
-    label: "Every 4 hrs",
-    value: 240
-  },
-  {
-    label: "Every 6 hrs",
-    value: 360
-  }
-];
 
 const App = () => {
   const [screen, setScreen] = React.useState<ScreensT>("home");
@@ -60,14 +41,25 @@ const App = () => {
   };
 
   if (screen === "setReminder") {
+    return <SetReminderScreen setScreen={setScreen} userData={userData} />;
+  }
+  if (screen === "setBetween") {
     return (
-      <FrequencySelector
-        setScreen={setScreen}
-        setStartTime={setStartTime}
+      <SetBetween
         setEndTime={setEndTime}
-        setFrequency={setFrequency}
-        frequencyOptions={frequencyOptions}
+        setStartTime={setStartTime}
+        setScreen={setScreen}
         userData={userData}
+      />
+    );
+  }
+  if (screen === "setFrequency") {
+    return (
+      <SetFrequency
+        setScreen={setScreen}
+        userData={userData}
+        frequency={frequency}
+        setFrequency={setFrequency}
       />
     );
   } else {

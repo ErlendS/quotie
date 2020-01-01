@@ -9,5 +9,6 @@ export const colors = {
   blue200: "#DEE7EB",
   blue100: "#E8EEF1",
   white: "#FFFFFF",
-  black: "#444444"
+  black: "#444444",
+  focused: "#2D9CDB"
 };

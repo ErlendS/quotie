@@ -3,9 +3,9 @@ import { Text, View, StyleSheet, Image } from "react-native";
 import * as dateFns from "date-fns";
 import { Icon } from "react-native-elements";
 
-import { UserDataT, SetScreenFn } from "./types";
-import { colors } from "./theme";
-import { PrimaryButton, TopNavigation } from "./components";
+import { UserDataT, SetScreenFn } from "../types";
+import { colors } from "../theme";
+import { PrimaryButton, TopNavigation } from "../components";
 
 const styles = StyleSheet.create({
   container: {
@@ -69,8 +69,8 @@ const Home = (props: { userData: UserDataT; setScreen: SetScreenFn }) => {
       <TopNavigation centerText="Stoic Reminders" />
       <View style={(styles.center, { flexGrow: 2 })}>
         <Image
-          source={require("./assets/statue_head.png")}
-          style={{ width: 279, height: 420 }}
+          source={require("../assets/statue_head.png")}
+          style={{ width: 220, height: 331 }}
         />
       </View>
 
@@ -83,7 +83,7 @@ const Home = (props: { userData: UserDataT; setScreen: SetScreenFn }) => {
             <Icon
               name="chevron-right"
               type="feather"
-              color="#444444"
+              color={colors.black}
               size={30}
             />
           }
