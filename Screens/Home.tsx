@@ -86,7 +86,7 @@ const Home = (props: { userData: UserDataT; setScreen: SetScreenFn }) => {
       <TopNavigation centerText="Stoic Reminders" />
       <View style={styles.center}>
         <Image
-          source={require("../assets/statue_head_new.png")}
+          source={require("../assets/statue_head.png")}
           style={props.userData ? styles.smallImage : styles.bigImage}
         />
       </View>

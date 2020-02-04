@@ -40,7 +40,7 @@ const SetReminderScreen = (props: {
       >
         <View style={styles.center}>
           <Image
-            source={require("../assets/statue_head_new.png")}
+            source={require("../assets/statue_head.png")}
             style={{ width: 220, height: 331 }}
           />
         </View>

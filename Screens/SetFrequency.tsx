@@ -63,7 +63,7 @@ const SetFrequency = (props: {
       <TopNavigation textSize="small" centerText="Repeat" />
       <View style={styles.center}>
         <Image
-          source={require("../assets/statue_head_new.png")}
+          source={require("../assets/statue_head.png")}
           style={{ width: 200, height: 300, opacity: 0.5 }}
         />
       </View>
