@@ -12,7 +12,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.blue100,
     alignItems: "center",
-    justifyContent: "center",
+    justifyContent: "space-between",
     flexDirection: "column",
     fontFamily: "Cochin"
   },
@@ -21,11 +21,25 @@ const styles = StyleSheet.create({
     alignItems: "center"
   },
   textWrapper: {
-    marginHorizontal: 16,
+    marginHorizontal: 24,
     marginBottom: 30,
     textAlign: "center",
     fontSize: 16,
     color: colors.blue800
+  },
+  textHeader: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: colors.blue800,
+    marginBottom: 12
+  },
+  smallImage: {
+    width: 220,
+    height: 331
+  },
+  bigImage: {
+    width: 300,
+    height: 451
   }
 });
 
@@ -38,18 +52,21 @@ function stringifyFrequency(frequency) {
 
 const ReminderText = (props: { userData: UserDataT }) => (
   <Text style={styles.textWrapper}>
-    A quote will be sent every{" "}
-    <Text style={{ fontWeight: "600" }}>
-      {stringifyFrequency(props.userData.frequency)}
-    </Text>{" "}
-    starting from{" "}
-    <Text style={{ fontWeight: "600" }}>
-      {dateFns.format(props.userData.startTime, "HH:mm")}
-    </Text>{" "}
-    ending{" "}
-    <Text style={{ fontWeight: "600" }}>
-      {dateFns.format(props.userData.endTime, "HH:mm")}
-    </Text>
+    <Text>A quote will be sent every</Text>
+    <Text
+      style={{ fontWeight: "600" }}
+      children={` ${stringifyFrequency(props.userData.frequency)} `}
+    />
+    <Text>between</Text>
+    <Text
+      style={{ fontWeight: "600" }}
+      children={` ${dateFns.format(props.userData.startTime, "HH:mm")} `}
+    />
+    <Text>and</Text>
+    <Text
+      style={{ fontWeight: "600" }}
+      children={` ${dateFns.format(props.userData.endTime, "HH:mm")} `}
+    />
   </Text>
 );
 
@@ -57,9 +74,9 @@ const ShowReminder = (props: {
   userData: UserDataT;
   setScreen: SetScreenFn;
 }) => (
-  <View style={{ flexGrow: 1, alignItems: "center" }}>
+  <View style={{ alignItems: "center" }}>
+    <Text children="Reminder set" style={styles.textHeader} />
     <ReminderText userData={props.userData} />
-    <PrimaryButton text="Edit" onPress={() => props.setScreen("setReminder")} />
   </View>
 );
 
@@ -67,29 +84,21 @@ const Home = (props: { userData: UserDataT; setScreen: SetScreenFn }) => {
   return (
     <View style={styles.container}>
       <TopNavigation centerText="Stoic Reminders" />
-      <View style={(styles.center, { flexGrow: 2 })}>
+      <View style={styles.center}>
         <Image
-          source={require("../assets/statue_head.png")}
-          style={{ width: 220, height: 331 }}
+          source={require("../assets/statue_head_new.png")}
+          style={props.userData ? styles.smallImage : styles.bigImage}
         />
       </View>
 
-      {props.userData ? (
+      {props.userData && (
         <ShowReminder userData={props.userData} setScreen={props.setScreen} />
-      ) : (
-        <PrimaryButton
-          text="Set Reminder"
-          icon={
-            <Icon
-              name="chevron-right"
-              type="feather"
-              color={colors.black}
-              size={30}
-            />
-          }
-          onPress={() => props.setScreen("setReminder")}
-        />
       )}
+
+      <PrimaryButton
+        text={props.userData ? "Edit" : "Set Reminder"}
+        onPress={() => props.setScreen("setReminder")}
+      />
     </View>
   );
 };

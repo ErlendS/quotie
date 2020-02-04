@@ -20,6 +20,10 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: colors.blue100,
     paddingBottom: 50
+  },
+  contentContainerStyle: {
+    flex: 1,
+    justifyContent: "space-between"
   }
 });
 
@@ -30,10 +34,13 @@ const SetReminderScreen = (props: {
   return (
     <View style={{ backgroundColor: colors.blue100, flex: 1 }}>
       <TopNavigation textSize="small" centerText="Set Reminder" />
-      <ScrollView style={styles.container}>
+      <ScrollView
+        style={styles.container}
+        contentContainerStyle={styles.contentContainerStyle}
+      >
         <View style={styles.center}>
           <Image
-            source={require("../assets/statue_head.png")}
+            source={require("../assets/statue_head_new.png")}
             style={{ width: 220, height: 331 }}
           />
         </View>
