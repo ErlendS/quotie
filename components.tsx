@@ -66,13 +66,18 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: "400"
   },
-  navigationContainer: {
+  topNavigationContainer: {
     marginTop: 28,
     height: 100,
     flexDirection: "row",
     width: "100%",
     alignItems: "center",
     justifyContent: "space-around"
+  },
+  bottomNavigation: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 24
   }
 });
 
@@ -120,7 +125,7 @@ const TopNavigation = (props: {
     />
   );
   return (
-    <View style={styles.navigationContainer}>
+    <View style={styles.topNavigationContainer}>
       {props.leftIcon ? props.leftIcon : placeholder}
       <Text
         style={props.textSize === "small" ? styles.titleSmall : styles.title}
@@ -155,7 +160,7 @@ const SelectableContainerText = ({ label, value, selected, onPress }) => (
 const BottomNavigation = (props: { onPress: () => void; text?: string }) => (
   <TouchableOpacity
     onPress={() => props.onPress()}
-    style={{ flexDirection: "row", alignItems: "center" }}
+    style={styles.bottomNavigation}
   >
     <Icon name="chevron-left" type="feather" color={colors.blue800} size={24} />
     <Text

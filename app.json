@@ -14,7 +14,7 @@
     "splash": {
       "image": "./assets/statue_head.png",
       "resizeMode": "contain",
-      "backgroundColor": "#F6F6F6"
+      "backgroundColor": "#E8EEF1"
     },
     "updates": {
       "fallbackToCacheTimeout": 0

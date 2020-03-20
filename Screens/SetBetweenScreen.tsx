@@ -4,7 +4,7 @@ import {
   StyleSheet,
   DatePickerIOS,
   ScrollView,
-  Text
+  Image
 } from "react-native";
 import * as dateFns from "date-fns";
 
@@ -28,15 +28,14 @@ const styles = StyleSheet.create({
     justifyContent: "center"
   },
   timePickerWrapper: {
-    marginBottom: 60,
+    marginBottom: 50,
     borderBottomWidth: 1,
     borderBottomColor: colors.blue400
   },
   wrapper: {
     flex: 1,
     backgroundColor: colors.blue100,
-    fontFamily: "Cochin",
-    paddingBottom: 50
+    fontFamily: "Cochin"
   },
   datePickerButton: {
     alignItems: "center",
@@ -54,6 +53,14 @@ const styles = StyleSheet.create({
   datePickerStyle: {
     borderTopWidth: 1,
     borderTopColor: colors.blue400
+  },
+  contentContainerStyle: {
+    flex: 1,
+    justifyContent: "space-between"
+  },
+  center: {
+    justifyContent: "center",
+    alignItems: "center"
   }
 });
 
@@ -67,54 +74,65 @@ const SetBetween = (props: {
     "start"
   );
   return (
-    <ScrollView style={styles.wrapper}>
+    <ScrollView
+      style={styles.wrapper}
+      contentContainerStyle={styles.contentContainerStyle}
+    >
       <TopNavigation textSize="small" centerText="Between" />
-      <View style={styles.timePickerWrapper}>
-        {toggleTimePicker === "start" && (
-          <React.Fragment>
-            <DatePickerIOS
-              style={styles.datePickerStyle}
-              date={props.userData.startTime}
-              onDateChange={props.setStartTime}
-              mode="time"
-              minuteInterval={10}
-            />
-          </React.Fragment>
-        )}
-        {toggleTimePicker === "end" && (
-          <React.Fragment>
-            <DatePickerIOS
-              style={styles.datePickerStyle}
-              date={props.userData.endTime}
-              onDateChange={props.setEndTime}
-              mode="time"
-              minuteInterval={10}
-            />
-          </React.Fragment>
-        )}
-        <View style={{ flexDirection: "row" }}>
-          <Tab
-            topText="Start"
-            bottomText={dateFns.format(props.userData.startTime, "HH:mm")}
-            active={toggleTimePicker === "start"}
-            onPress={() => {
-              settoggleTimePicker("start");
-            }}
-          />
-          <Tab
-            topText="End"
-            bottomText={dateFns.format(props.userData.endTime, "HH:mm")}
-            active={toggleTimePicker === "end"}
-            onPress={() => {
-              settoggleTimePicker("end");
-            }}
+      <View>
+        <View style={styles.center}>
+          <Image
+            source={require("../assets/statue_head.png")}
+            style={{ width: 200, height: 300, opacity: 0.5 }}
           />
         </View>
+        <View style={styles.timePickerWrapper}>
+          {toggleTimePicker === "start" && (
+            <React.Fragment>
+              <DatePickerIOS
+                style={styles.datePickerStyle}
+                date={props.userData.startTime}
+                onDateChange={props.setStartTime}
+                mode="time"
+                minuteInterval={10}
+              />
+            </React.Fragment>
+          )}
+          {toggleTimePicker === "end" && (
+            <React.Fragment>
+              <DatePickerIOS
+                style={styles.datePickerStyle}
+                date={props.userData.endTime}
+                onDateChange={props.setEndTime}
+                mode="time"
+                minuteInterval={10}
+              />
+            </React.Fragment>
+          )}
+          <View style={{ flexDirection: "row" }}>
+            <Tab
+              topText="Start"
+              bottomText={dateFns.format(props.userData.startTime, "HH:mm")}
+              active={toggleTimePicker === "start"}
+              onPress={() => {
+                settoggleTimePicker("start");
+              }}
+            />
+            <Tab
+              topText="End"
+              bottomText={dateFns.format(props.userData.endTime, "HH:mm")}
+              active={toggleTimePicker === "end"}
+              onPress={() => {
+                settoggleTimePicker("end");
+              }}
+            />
+          </View>
+        </View>
+        <BottomNavigation
+          text="Save"
+          onPress={() => props.setScreen("setReminder")}
+        />
       </View>
-      <BottomNavigation
-        text="Save"
-        onPress={() => props.setScreen("setReminder")}
-      />
     </ScrollView>
   );
 };
