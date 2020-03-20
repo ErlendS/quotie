@@ -1,4 +1,5 @@
 import React from "react";
+import * as Font from "expo-font";
 import * as dateFns from "date-fns";
 
 import { UserDataT, ScreensT } from "./types";
@@ -15,13 +16,28 @@ const setInitalTime = () => {
 };
 
 const App = () => {
+  const [fontLoaded, setFontLoaded] = React.useState(false);
+  const [reminderEnabled, setReminderEnabled] = React.useState(true);
   const [screen, setScreen] = React.useState<ScreensT>("home");
   const [frequency, setFrequency] = React.useState(60);
   const [startTime, setStartTime] = React.useState(setInitalTime());
   const [endTime, setEndTime] = React.useState(
     dateFns.addHours(setInitalTime(), 12)
   );
-
+  React.useEffect(() => {
+    async function loadFonts() {
+      await Font.loadAsync({
+        "Montserrat-Regular": require("./assets/fonts/Montserrat-Regular.ttf"),
+        "Montserrat-SemiBold": require("./assets/fonts/Montserrat-SemiBold.ttf"),
+        "Montserrat-Medium": require("./assets/fonts/Montserrat-Medium.ttf"),
+        "Montserrat-Bold": require("./assets/fonts/Montserrat-Bold.ttf")
+      }).catch(() => {
+        console.warn("So sorry, something went wrong loading the fonts");
+      });
+      setFontLoaded(true);
+    }
+    loadFonts();
+  }, []);
   // React.useEffect(() => {
   //   getUserNotificationSettings()
   //     .then(userData => {
@@ -37,11 +53,17 @@ const App = () => {
   const userData: UserDataT = {
     frequency,
     startTime,
-    endTime
+    endTime,
+    reminderEnabled
   };
-
   if (screen === "setReminder") {
-    return <SetReminderScreen setScreen={setScreen} userData={userData} />;
+    return (
+      <SetReminderScreen
+        setScreen={setScreen}
+        userData={userData}
+        setReminderEnabled={setReminderEnabled}
+      />
+    );
   }
   if (screen === "setBetween") {
     return (
@@ -63,7 +85,13 @@ const App = () => {
       />
     );
   } else {
-    return <Home setScreen={setScreen} userData={userData} />;
+    return fontLoaded ? (
+      <Home
+        setScreen={setScreen}
+        userData={userData}
+        cancelReminder={() => setReminderEnabled(false)}
+      />
+    ) : null;
   }
 };
 

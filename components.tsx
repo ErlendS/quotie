@@ -1,5 +1,12 @@
 import React from "react";
-import { Text, View, TouchableOpacity, StyleSheet } from "react-native";
+import * as Font from "expo-font";
+import {
+  Text,
+  View,
+  TouchableOpacity,
+  StyleSheet,
+  TextStyle
+} from "react-native";
 import { Icon } from "react-native-elements";
 import * as dateFns from "date-fns";
 
@@ -7,7 +14,7 @@ import { colors } from "./theme";
 
 const styles = StyleSheet.create({
   containerText: {
-    color: colors.black
+    color: colors.blue800
   },
   textContainer: {
     flexDirection: "row",
@@ -31,15 +38,27 @@ const styles = StyleSheet.create({
     borderBottomColor: colors.blue400,
     paddingHorizontal: 16
   },
-  primaryButtonStyle: {
+  buttonStyle: {
     backgroundColor: colors.white,
     height: 51,
     width: "70%",
     borderStyle: "solid",
-    borderColor: colors.blue800,
+    borderColor: colors.blue700,
     borderWidth: 1,
-    color: colors.blue900,
     borderRadius: 3,
+    alignItems: "center",
+    fontSize: 16,
+    justifyContent: "space-between",
+    flexDirection: "row"
+  },
+  buttonText: {
+    textAlign: "center",
+    flexGrow: 1,
+    color: colors.blue800
+  },
+  secondaryButtonStyle: {
+    height: 51,
+    width: "auto",
     alignItems: "center",
     fontSize: 16,
     justifyContent: "space-between",
@@ -47,7 +66,7 @@ const styles = StyleSheet.create({
   },
   tabsContainer: {
     flexGrow: 1,
-    backgroundColor: colors.blue200,
+    backgroundColor: colors.white,
     height: 60,
     width: "50%",
     borderTopWidth: 3,
@@ -58,13 +77,11 @@ const styles = StyleSheet.create({
   },
   title: {
     color: colors.blue900,
-    fontSize: 37,
-    fontWeight: "400"
+    fontSize: 37
   },
   titleSmall: {
     color: colors.blue900,
-    fontSize: 28,
-    fontWeight: "400"
+    fontSize: 28
   },
   topNavigationContainer: {
     marginTop: 28,
@@ -77,36 +94,45 @@ const styles = StyleSheet.create({
   bottomNavigation: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 24
+    marginBottom: 32
   }
 });
 
-const PrimaryButton = (props: {
+type FontWeightVariants = "SemiBold" | "Medium" | "Bold";
+
+const AppText = (props: {
+  children: React.ReactNode;
+  style?: TextStyle | TextStyle[];
+  fontWeight?: FontWeightVariants;
+}) => {
+  const fontType = !props.fontWeight ? "Regular" : props.fontWeight;
+  return (
+    <Text style={[{ fontFamily: `Montserrat-${fontType}` }, props.style]}>
+      {props.children}
+    </Text>
+  );
+};
+
+const Button = (props: {
   text: string;
-  icon?: React.ReactNode;
   onPress: () => void;
+  secondary?: boolean;
 }) => (
-  <View
-    style={{
-      height: "15%",
-      width: "100%",
-      alignItems: "center"
-    }}
-  >
+  <View>
     <TouchableOpacity
-      style={styles.primaryButtonStyle}
+      style={props.secondary ? styles.secondaryButtonStyle : styles.buttonStyle}
       onPress={props.onPress}
       activeOpacity={0.4}
     >
-      {props.icon ? (
-        <View
-          style={{
-            width: 30
-          }}
-        />
-      ) : null}
-      <Text style={{ textAlign: "center", flexGrow: 1 }}>{props.text}</Text>
-      {props.icon}
+      <AppText
+        fontWeight="Medium"
+        style={[
+          props.secondary && { textDecorationLine: "underline" },
+          styles.buttonText
+        ]}
+      >
+        {props.text}
+      </AppText>
     </TouchableOpacity>
   </View>
 );
@@ -127,11 +153,12 @@ const TopNavigation = (props: {
   return (
     <View style={styles.topNavigationContainer}>
       {props.leftIcon ? props.leftIcon : placeholder}
-      <Text
+      <AppText
+        fontWeight="SemiBold"
         style={props.textSize === "small" ? styles.titleSmall : styles.title}
       >
         {props.centerText}
-      </Text>
+      </AppText>
       {props.rightIcon ? props.rightIcon : placeholder}
     </View>
   );
@@ -143,14 +170,16 @@ const TextContainer = ({ leftText, rightText, onPress }) => (
     style={styles.textContainer}
     activeOpacity={1}
   >
-    <Text style={styles.containerText}>{leftText}</Text>
-    <Text style={styles.containerText}>{rightText}</Text>
+    <AppText fontWeight="Medium" style={styles.containerText}>
+      {leftText}
+    </AppText>
+    <AppText style={styles.containerText}>{rightText}</AppText>
   </TouchableOpacity>
 );
 
 const SelectableContainerText = ({ label, value, selected, onPress }) => (
   <TouchableOpacity style={styles.selectors} onPress={() => onPress(value)}>
-    <Text style={styles.containerText}>{label}</Text>
+    <AppText style={styles.containerText}>{label}</AppText>
     {selected ? (
       <Icon name="check" type="feather" color={colors.black} size={15} />
     ) : null}
@@ -163,8 +192,9 @@ const BottomNavigation = (props: { onPress: () => void; text?: string }) => (
     style={styles.bottomNavigation}
   >
     <Icon name="chevron-left" type="feather" color={colors.blue800} size={24} />
-    <Text
-      style={{ fontSize: 14, color: colors.blue800 }}
+    <AppText
+      fontWeight="SemiBold"
+      style={{ fontSize: 18, color: colors.blue800 }}
       children={props.text || "Back"}
     />
   </TouchableOpacity>
@@ -214,23 +244,23 @@ const Tab = (props: {
         ? null
         : {
             borderTopColor: colors.blue200,
-            backgroundColor: colors.blue100,
+            backgroundColor: colors.white,
             borderTopWidth: 1
           }
     ]}
     onPress={() => props.onPress()}
   >
-    <Text
+    <AppText
+      fontWeight="Medium"
       style={{
-        color: props.active ? colors.blue800 : colors.blue600,
-        fontWeight: "500"
+        color: props.active ? colors.blue800 : colors.blue500
       }}
       children={props.topText}
     />
-    <Text
+    <AppText
+      fontWeight="Bold"
       style={{
-        color: props.active ? colors.blue800 : colors.blue600,
-        fontWeight: "700"
+        color: props.active ? colors.blue800 : colors.blue500
       }}
       children={props.bottomText}
     />
@@ -238,11 +268,12 @@ const Tab = (props: {
 );
 
 export {
-  PrimaryButton,
+  Button,
   TopNavigation,
   TextContainer,
   SelectableContainerText,
   BottomNavigation,
   Tabs,
-  Tab
+  Tab,
+  AppText
 };

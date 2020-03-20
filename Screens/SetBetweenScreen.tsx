@@ -13,46 +13,17 @@ import { TopNavigation, BottomNavigation, Tab } from "../components";
 import { colors } from "../theme";
 
 const styles = StyleSheet.create({
-  baseText: {
-    color: colors.black
-  },
-  subTitle: {
-    color: colors.blue900,
-    fontSize: 28,
-    fontWeight: "500"
-  },
-  subTitleWrapper: {
-    height: 100,
-    width: "100%",
-    alignItems: "center",
-    justifyContent: "center"
-  },
   timePickerWrapper: {
     marginBottom: 50,
     borderBottomWidth: 1,
-    borderBottomColor: colors.blue400
+    borderBottomColor: colors.blue400,
+    borderTopWidth: 1,
+    borderTopColor: colors.blue400
   },
   wrapper: {
     flex: 1,
     backgroundColor: colors.blue100,
     fontFamily: "Cochin"
-  },
-  datePickerButton: {
-    alignItems: "center",
-    justifyContent: "center",
-    height: 51,
-    borderTopWidth: 1,
-    borderTopColor: colors.blue400,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.blue400
-  },
-  datePickerButtonText: {
-    fontWeight: "600",
-    color: colors.black
-  },
-  datePickerStyle: {
-    borderTopWidth: 1,
-    borderTopColor: colors.blue400
   },
   contentContainerStyle: {
     flex: 1,
@@ -90,7 +61,6 @@ const SetBetween = (props: {
           {toggleTimePicker === "start" && (
             <React.Fragment>
               <DatePickerIOS
-                style={styles.datePickerStyle}
                 date={props.userData.startTime}
                 onDateChange={props.setStartTime}
                 mode="time"
@@ -101,7 +71,6 @@ const SetBetween = (props: {
           {toggleTimePicker === "end" && (
             <React.Fragment>
               <DatePickerIOS
-                style={styles.datePickerStyle}
                 date={props.userData.endTime}
                 onDateChange={props.setEndTime}
                 mode="time"
@@ -118,6 +87,7 @@ const SetBetween = (props: {
                 settoggleTimePicker("start");
               }}
             />
+            <View style={{ width: 1, backgroundColor: colors.blue200 }} />
             <Tab
               topText="End"
               bottomText={dateFns.format(props.userData.endTime, "HH:mm")}
