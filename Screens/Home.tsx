@@ -1,20 +1,18 @@
 import React from "react";
-import { Text, View, StyleSheet, Image } from "react-native";
+import { View, StyleSheet, Image, Alert } from "react-native";
 import * as dateFns from "date-fns";
-import { Icon } from "react-native-elements";
 
 import { UserDataT, SetScreenFn } from "../types";
 import { colors } from "../theme";
-import { PrimaryButton, TopNavigation } from "../components";
+import { Button, TopNavigation, AppText } from "../components";
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.blue100,
     alignItems: "center",
-    justifyContent: "space-between",
-    flexDirection: "column",
-    fontFamily: "Cochin"
+    justifyContent: "flex-start",
+    flexDirection: "column"
   },
   center: {
     justifyContent: "center",
@@ -24,11 +22,11 @@ const styles = StyleSheet.create({
     marginHorizontal: 24,
     marginBottom: 30,
     textAlign: "center",
-    fontSize: 16,
+    fontSize: 18,
     color: colors.blue800
   },
   textHeader: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: "700",
     color: colors.blue800,
     marginBottom: 12
@@ -51,54 +49,84 @@ function stringifyFrequency(frequency) {
 }
 
 const ReminderText = (props: { userData: UserDataT }) => (
-  <Text style={styles.textWrapper}>
-    <Text>A quote will be sent every</Text>
-    <Text
-      style={{ fontWeight: "600" }}
+  <AppText style={styles.textWrapper}>
+    <AppText>A quote will be sent every</AppText>
+    <AppText
+      fontWeight="SemiBold"
       children={` ${stringifyFrequency(props.userData.frequency)} `}
     />
-    <Text>between</Text>
-    <Text
-      style={{ fontWeight: "600" }}
+    <AppText>from</AppText>
+    <AppText
+      fontWeight="SemiBold"
       children={` ${dateFns.format(props.userData.startTime, "HH:mm")} `}
     />
-    <Text>and</Text>
-    <Text
-      style={{ fontWeight: "600" }}
+    <AppText>to</AppText>
+    <AppText
+      fontWeight="SemiBold"
       children={` ${dateFns.format(props.userData.endTime, "HH:mm")} `}
     />
-  </Text>
+  </AppText>
 );
 
 const ShowReminder = (props: {
   userData: UserDataT;
   setScreen: SetScreenFn;
 }) => (
-  <View style={{ alignItems: "center" }}>
-    <Text children="Reminder set" style={styles.textHeader} />
+  <>
+    <AppText
+      fontWeight="SemiBold"
+      children="Reminder set"
+      style={styles.textHeader}
+    />
     <ReminderText userData={props.userData} />
-  </View>
+  </>
 );
 
-const Home = (props: { userData: UserDataT; setScreen: SetScreenFn }) => {
+const Home = (props: {
+  userData: UserDataT;
+  setScreen: SetScreenFn;
+  cancelReminder: () => void;
+}) => {
   return (
     <View style={styles.container}>
       <TopNavigation centerText="Stoic Reminders" />
-      <View style={styles.center}>
+      <View style={[styles.center, { marginBottom: 40 }]}>
         <Image
           source={require("../assets/statue_head.png")}
           style={props.userData ? styles.smallImage : styles.bigImage}
         />
       </View>
-
-      {props.userData && (
-        <ShowReminder userData={props.userData} setScreen={props.setScreen} />
-      )}
-
-      <PrimaryButton
-        text={props.userData ? "Edit" : "Set Reminder"}
-        onPress={() => props.setScreen("setReminder")}
-      />
+      <View
+        style={{ flex: 1, justifyContent: "flex-start", alignItems: "center" }}
+      >
+        {props.userData.reminderEnabled ? (
+          <ShowReminder userData={props.userData} setScreen={props.setScreen} />
+        ) : (
+          <AppText
+            style={{ color: colors.blue800, fontSize: 24 }}
+            fontWeight="SemiBold"
+            children="No Reminder Set"
+          />
+        )}
+      </View>
+      <View style={[styles.center, { marginBottom: 48 }]}>
+        <Button
+          text={props.userData.reminderEnabled ? "Edit" : "Set Reminder"}
+          onPress={() => props.setScreen("setReminder")}
+        />
+        {props.userData.reminderEnabled && (
+          <Button
+            variant="secondary"
+            text="Cancel Reminder"
+            onPress={() =>
+              Alert.alert("Cancel Reminder?", "", [
+                { text: "No", onPress: () => null, style: "cancel" },
+                { text: "Yes", onPress: props.cancelReminder }
+              ])
+            }
+          />
+        )}
+      </View>
     </View>
   );
 };

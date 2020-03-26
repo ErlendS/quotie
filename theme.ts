@@ -1,3 +1,6 @@
+import * as React from "react";
+import * as Font from "expo-font";
+
 export const colors = {
   blue900: "#27414E",
   blue800: "#46626F",
@@ -11,4 +14,24 @@ export const colors = {
   white: "#FFFFFF",
   black: "#444444",
   focused: "#2D9CDB"
+};
+
+export const useLoadFonts = (props: {
+  setFontLoaded: React.Dispatch<React.SetStateAction<boolean>>;
+}) => {
+  React.useEffect(() => {
+    async function loadFonts() {
+      await Font.loadAsync({
+        "Montserrat-Regular": require("./assets/fonts/Montserrat-Regular.ttf"),
+        "Montserrat-SemiBold": require("./assets/fonts/Montserrat-SemiBold.ttf"),
+        "Montserrat-Medium": require("./assets/fonts/Montserrat-Medium.ttf"),
+        "Montserrat-Bold": require("./assets/fonts/Montserrat-Bold.ttf")
+      }).catch(() => {
+        // FLAGGED - Add toastbar here -- consider Material UI
+        console.warn("So sorry, something went wrong loading the fonts");
+      });
+      props.setFontLoaded(true);
+    }
+    loadFonts();
+  }, []);
 };
