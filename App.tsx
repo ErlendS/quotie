@@ -7,6 +7,7 @@ import SetReminderScreen from "./Screens/SetReminderScreen";
 import Home from "./Screens/Home";
 import SetFrequency from "./Screens/SetFrequency";
 import SetBetween from "./Screens/SetBetweenScreen";
+import { useLoadFonts } from "./theme";
 
 const setInitalTime = () => {
   const currentTime = dateFns.startOfHour(new Date());
@@ -24,20 +25,9 @@ const App = () => {
   const [endTime, setEndTime] = React.useState(
     dateFns.addHours(setInitalTime(), 12)
   );
-  React.useEffect(() => {
-    async function loadFonts() {
-      await Font.loadAsync({
-        "Montserrat-Regular": require("./assets/fonts/Montserrat-Regular.ttf"),
-        "Montserrat-SemiBold": require("./assets/fonts/Montserrat-SemiBold.ttf"),
-        "Montserrat-Medium": require("./assets/fonts/Montserrat-Medium.ttf"),
-        "Montserrat-Bold": require("./assets/fonts/Montserrat-Bold.ttf")
-      }).catch(() => {
-        console.warn("So sorry, something went wrong loading the fonts");
-      });
-      setFontLoaded(true);
-    }
-    loadFonts();
-  }, []);
+
+  useLoadFonts({ setFontLoaded });
+
   // React.useEffect(() => {
   //   getUserNotificationSettings()
   //     .then(userData => {

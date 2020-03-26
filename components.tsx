@@ -116,18 +116,22 @@ const AppText = (props: {
 const Button = (props: {
   text: string;
   onPress: () => void;
-  secondary?: boolean;
+  variant?: "primary" | "secondary";
 }) => (
   <View>
     <TouchableOpacity
-      style={props.secondary ? styles.secondaryButtonStyle : styles.buttonStyle}
+      style={
+        props.variant === "secondary"
+          ? styles.secondaryButtonStyle
+          : styles.buttonStyle
+      }
       onPress={props.onPress}
       activeOpacity={0.4}
     >
       <AppText
         fontWeight="Medium"
         style={[
-          props.secondary && { textDecorationLine: "underline" },
+          props.variant === "secondary" && { textDecorationLine: "underline" },
           styles.buttonText
         ]}
       >
@@ -201,7 +205,6 @@ const BottomNavigation = (props: { onPress: () => void; text?: string }) => (
 );
 const Tabs = (props: { children: React.ReactNode }) => {
   const count = React.Children.count(props.children);
-  console.warn("count is", count);
   const activeBarLength = Math.floor(100 / count);
   const activeBarPlacement = activeBarLength * (count - 1);
 

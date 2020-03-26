@@ -55,12 +55,12 @@ const ReminderText = (props: { userData: UserDataT }) => (
       fontWeight="SemiBold"
       children={` ${stringifyFrequency(props.userData.frequency)} `}
     />
-    <AppText>between</AppText>
+    <AppText>from</AppText>
     <AppText
       fontWeight="SemiBold"
       children={` ${dateFns.format(props.userData.startTime, "HH:mm")} `}
     />
-    <AppText>and</AppText>
+    <AppText>to</AppText>
     <AppText
       fontWeight="SemiBold"
       children={` ${dateFns.format(props.userData.endTime, "HH:mm")} `}
@@ -116,7 +116,7 @@ const Home = (props: {
         />
         {props.userData.reminderEnabled && (
           <Button
-            secondary={true}
+            variant="secondary"
             text="Cancel Reminder"
             onPress={() =>
               Alert.alert("Cancel Reminder?", "", [
