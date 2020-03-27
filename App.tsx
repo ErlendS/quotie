@@ -1,12 +1,11 @@
 import React from "react";
-import * as Font from "expo-font";
 import * as dateFns from "date-fns";
 
 import { UserDataT, ScreensT } from "./types";
-import SetReminderScreen from "./Screens/SetReminderScreen";
+import ReminderScreen from "./Screens/ReminderScreen";
 import Home from "./Screens/Home";
-import SetFrequency from "./Screens/SetFrequency";
-import SetBetween from "./Screens/SetBetweenScreen";
+import FrequencyScreen from "./Screens/FrequencyScreen";
+import BetweenScreen from "./Screens/BetweenScreen";
 import { useLoadFonts } from "./theme";
 
 const setInitalTime = () => {
@@ -17,7 +16,6 @@ const setInitalTime = () => {
 };
 
 const App = () => {
-  const [fontLoaded, setFontLoaded] = React.useState(false);
   const [reminderEnabled, setReminderEnabled] = React.useState(true);
   const [screen, setScreen] = React.useState<ScreensT>("home");
   const [frequency, setFrequency] = React.useState(60);
@@ -25,9 +23,7 @@ const App = () => {
   const [endTime, setEndTime] = React.useState(
     dateFns.addHours(setInitalTime(), 12)
   );
-
-  useLoadFonts({ setFontLoaded });
-
+  const fontLoaded = useLoadFonts();
   // React.useEffect(() => {
   //   getUserNotificationSettings()
   //     .then(userData => {
@@ -39,7 +35,6 @@ const App = () => {
   //     })
   //     .catch(error => console.error(error));
   // }, []);
-
   const userData: UserDataT = {
     frequency,
     startTime,
@@ -48,7 +43,7 @@ const App = () => {
   };
   if (screen === "setReminder") {
     return (
-      <SetReminderScreen
+      <ReminderScreen
         setScreen={setScreen}
         userData={userData}
         setReminderEnabled={setReminderEnabled}
@@ -57,7 +52,7 @@ const App = () => {
   }
   if (screen === "setBetween") {
     return (
-      <SetBetween
+      <BetweenScreen
         setEndTime={setEndTime}
         setStartTime={setStartTime}
         setScreen={setScreen}
@@ -67,7 +62,7 @@ const App = () => {
   }
   if (screen === "setFrequency") {
     return (
-      <SetFrequency
+      <FrequencyScreen
         setScreen={setScreen}
         userData={userData}
         frequency={frequency}

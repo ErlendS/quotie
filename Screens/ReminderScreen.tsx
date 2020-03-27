@@ -3,50 +3,55 @@ import { View, StyleSheet, Image, ScrollView } from "react-native";
 import * as dateFns from "date-fns";
 
 import { UserDataT, SetScreenFn } from "../types";
-import { TopNavigation, TextContainer, Button } from "../components";
-import { colors } from "../theme";
+import {
+  TopNavigation,
+  TextContainer,
+  Button,
+  BackgroundImage
+} from "../components";
+import { colors, spacing } from "../theme";
 import { stringifyFrequency } from "../variables";
 
 const styles = StyleSheet.create({
-  center: {
-    justifyContent: "center",
-    alignItems: "center"
-  },
   container: {
     backgroundColor: colors.blue100,
-    paddingBottom: 50
-  },
-  contentContainerStyle: {
     flex: 1,
-    justifyContent: "space-between",
+    paddingTop: spacing[5]
+  },
+  scrollViewContainer: {
+    backgroundColor: "transparent",
+    paddingBottom: spacing[7]
+  },
+  scrollViewContentContainerStyle: {
+    flex: 1,
+    justifyContent: "flex-start",
     alignItems: "center"
   },
-  textContainerWrapper: {
+  actionsWrapper: {
+    flex: 1,
+    justifyContent: "flex-end",
     borderBottomWidth: 1,
     borderBottomColor: colors.blue400,
-    width: "100%"
+    width: "100%",
+    marginBottom: spacing[7]
   }
 });
 
-const SetReminderScreen = (props: {
+const ReminderScreen = (props: {
   userData: UserDataT;
   setScreen: SetScreenFn;
   setReminderEnabled: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
   return (
-    <View style={{ backgroundColor: colors.blue100, flex: 1 }}>
+    <View style={styles.container}>
       <TopNavigation textSize="small" centerText="Set Reminder" />
+      <BackgroundImage placement="oneThird" />
+
       <ScrollView
-        style={styles.container}
-        contentContainerStyle={styles.contentContainerStyle}
+        style={styles.scrollViewContainer}
+        contentContainerStyle={styles.scrollViewContentContainerStyle}
       >
-        <View style={styles.center}>
-          <Image
-            source={require("../assets/statue_head.png")}
-            style={{ width: 220, height: 331 }}
-          />
-        </View>
-        <View style={styles.textContainerWrapper}>
+        <View style={styles.actionsWrapper}>
           <TextContainer
             leftText="Repeat"
             rightText={`Every ${stringifyFrequency(props.userData.frequency)}`}
@@ -62,7 +67,7 @@ const SetReminderScreen = (props: {
           />
         </View>
         <Button
-          text="Set"
+          text="Set Reminder"
           onPress={() => {
             props.setScreen("home"), props.setReminderEnabled(true);
           }}
@@ -72,4 +77,4 @@ const SetReminderScreen = (props: {
   );
 };
 
-export default SetReminderScreen;
+export default ReminderScreen;

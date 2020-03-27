@@ -1,10 +1,10 @@
 import React from "react";
-import { View, StyleSheet, Image, Alert } from "react-native";
+import { View, StyleSheet, Alert } from "react-native";
 import * as dateFns from "date-fns";
 
 import { UserDataT, SetScreenFn } from "../types";
-import { colors } from "../theme";
-import { Button, TopNavigation, AppText } from "../components";
+import { colors, spacing } from "../theme";
+import { Button, TopNavigation, AppText, BackgroundImage } from "../components";
 
 const styles = StyleSheet.create({
   container: {
@@ -12,7 +12,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.blue100,
     alignItems: "center",
     justifyContent: "flex-start",
-    flexDirection: "column"
+    paddingTop: spacing[5]
   },
   center: {
     justifyContent: "center",
@@ -20,7 +20,7 @@ const styles = StyleSheet.create({
   },
   textWrapper: {
     marginHorizontal: 24,
-    marginBottom: 30,
+    marginBottom: 32,
     textAlign: "center",
     fontSize: 18,
     color: colors.blue800
@@ -30,14 +30,6 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     color: colors.blue800,
     marginBottom: 12
-  },
-  smallImage: {
-    width: 220,
-    height: 331
-  },
-  bigImage: {
-    width: 300,
-    height: 451
   }
 });
 
@@ -90,20 +82,17 @@ const Home = (props: {
   return (
     <View style={styles.container}>
       <TopNavigation centerText="Stoic Reminders" />
-      <View style={[styles.center, { marginBottom: 40 }]}>
-        <Image
-          source={require("../assets/statue_head.png")}
-          style={props.userData ? styles.smallImage : styles.bigImage}
-        />
-      </View>
+      <BackgroundImage placement="oneThird" />
       <View
-        style={{ flex: 1, justifyContent: "flex-start", alignItems: "center" }}
+        style={{ flex: 1, justifyContent: "flex-end", alignItems: "center" }}
       >
-        {props.userData.reminderEnabled ? (
+        {props.userData.reminderEnabled && (
           <ShowReminder userData={props.userData} setScreen={props.setScreen} />
-        ) : (
+        )}
+
+        {!props.userData.reminderEnabled && (
           <AppText
-            style={{ color: colors.blue800, fontSize: 24 }}
+            style={{ color: colors.blue800, fontSize: 24, marginBottom: 48 }}
             fontWeight="SemiBold"
             children="No Reminder Set"
           />
