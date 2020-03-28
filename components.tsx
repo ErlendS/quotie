@@ -1,16 +1,16 @@
 import React from "react";
-import * as Font from "expo-font";
 import {
   Text,
   View,
+  Image,
   TouchableOpacity,
   StyleSheet,
-  TextStyle
+  TextStyle,
+  Dimensions
 } from "react-native";
 import { Icon } from "react-native-elements";
-import * as dateFns from "date-fns";
 
-import { colors } from "./theme";
+import { colors, spacing, fontSize } from "./theme";
 
 const styles = StyleSheet.create({
   containerText: {
@@ -20,72 +20,86 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    fontSize: 16,
+    fontSize: fontSize[1],
     backgroundColor: colors.white,
-    height: 50,
+    height: spacing[7],
     borderTopWidth: 1,
     borderTopColor: colors.blue400,
-    paddingHorizontal: 16
+    paddingHorizontal: spacing[3]
   },
   selectors: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    fontSize: 16,
+    fontSize: fontSize[1],
     backgroundColor: colors.white,
-    height: 50,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.blue400,
-    paddingHorizontal: 16
+    height: spacing[7],
+    borderTopWidth: 1,
+    borderTopColor: colors.blue400,
+    paddingHorizontal: spacing[3]
   },
-  buttonStyle: {
+  secondaryButton: {
+    height: spacing[7],
+    width: "auto",
+    alignItems: "center",
+    fontSize: fontSize[1],
+    justifyContent: "space-between",
+    flexDirection: "row"
+  },
+  primaryButton: {
     backgroundColor: colors.white,
-    height: 51,
+    height: spacing[7],
     width: "70%",
     borderStyle: "solid",
     borderColor: colors.blue700,
     borderWidth: 1,
     borderRadius: 3,
     alignItems: "center",
-    fontSize: 16,
+    fontSize: fontSize[1],
     justifyContent: "space-between",
     flexDirection: "row"
   },
-  buttonText: {
+  primaryButtonText: {
     textAlign: "center",
     flexGrow: 1,
     color: colors.blue800
   },
-  secondaryButtonStyle: {
-    height: 51,
-    width: "auto",
-    alignItems: "center",
-    fontSize: 16,
-    justifyContent: "space-between",
-    flexDirection: "row"
-  },
-  tabsContainer: {
+  secondaryButtonText: {
+    textAlign: "center",
     flexGrow: 1,
-    backgroundColor: colors.white,
-    height: 60,
-    width: "50%",
-    borderTopWidth: 3,
-    borderTopColor: colors.focused,
+    color: colors.blue800,
+    textDecorationLine: "underline"
+  },
+  focusedTabsContainer: {
+    flexGrow: 1,
     alignItems: "center",
     justifyContent: "center",
-    alignSelf: "flex-end"
+    alignSelf: "flex-end",
+    height: spacing[7],
+    backgroundColor: colors.white,
+    borderTopColor: colors.focused,
+    borderTopWidth: 3
+  },
+  defaultTabsContainer: {
+    flexGrow: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    alignSelf: "flex-end",
+    height: spacing[7],
+    backgroundColor: colors.white,
+    borderTopColor: colors.blue200,
+    borderTopWidth: 1
   },
   title: {
     color: colors.blue900,
-    fontSize: 37
+    fontSize: fontSize[5]
   },
   titleSmall: {
     color: colors.blue900,
-    fontSize: 28
+    fontSize: fontSize[3]
   },
   topNavigationContainer: {
-    marginTop: 28,
-    height: 100,
+    height: spacing[9],
     flexDirection: "row",
     width: "100%",
     alignItems: "center",
@@ -94,17 +108,35 @@ const styles = StyleSheet.create({
   bottomNavigation: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 32
+    width: "auto"
+  },
+  centerPlacement: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: "center",
+    alignItems: "center"
+  },
+  oneThirdPlacement: {
+    position: "absolute",
+    top: "15%",
+    left: 0,
+    right: 0,
+    bottom: 0,
+    alignItems: "center"
   }
 });
 
 type FontWeightVariants = "SemiBold" | "Medium" | "Bold";
 
-const AppText = (props: {
+interface AppTextProps {
   children: React.ReactNode;
   style?: TextStyle | TextStyle[];
   fontWeight?: FontWeightVariants;
-}) => {
+}
+const AppText = (props: AppTextProps) => {
   const fontType = !props.fontWeight ? "Regular" : props.fontWeight;
   return (
     <Text style={[{ fontFamily: `Montserrat-${fontType}` }, props.style]}>
@@ -120,20 +152,13 @@ const Button = (props: {
 }) => (
   <View>
     <TouchableOpacity
-      style={
-        props.variant === "secondary"
-          ? styles.secondaryButtonStyle
-          : styles.buttonStyle
-      }
+      style={styles[`${props.variant || "primary"}Button`]}
       onPress={props.onPress}
       activeOpacity={0.4}
     >
       <AppText
         fontWeight="Medium"
-        style={[
-          props.variant === "secondary" && { textDecorationLine: "underline" },
-          styles.buttonText
-        ]}
+        style={styles[`${props.variant || "primary"}ButtonText`]}
       >
         {props.text}
       </AppText>
@@ -141,12 +166,42 @@ const Button = (props: {
   </View>
 );
 
-const TopNavigation = (props: {
+interface BackgroundImageProps {
+  opacity?: number;
+  percentageOfScreenWidth?: number;
+  placement?: "center" | "oneThird";
+}
+const BackgroundImage = (props: BackgroundImageProps) => {
+  const RATIO = 1.5;
+  const PERCENTAGE_OF_SCREEN_WIDTH = props.percentageOfScreenWidth || 0.7;
+
+  const screenWidth = Math.round(Dimensions.get("window").width);
+
+  const imgWidth = screenWidth * PERCENTAGE_OF_SCREEN_WIDTH;
+  const imgHeight = imgWidth * RATIO;
+
+  return (
+    <View
+      style={[
+        styles[`${props.placement || "center"}Placement`],
+        { opacity: props.opacity || 1 }
+      ]}
+    >
+      <Image
+        source={require("./assets/statue_head.png")}
+        style={{ width: imgWidth, height: imgHeight }}
+      />
+    </View>
+  );
+};
+
+interface TopNavigationProps {
   leftIcon?: React.ReactNode;
   centerText: string;
   rightIcon?: React.ReactNode;
   textSize?: "small" | "medium";
-}) => {
+}
+const TopNavigation = (props: TopNavigationProps) => {
   const placeholder = (
     <View
       style={{
@@ -168,102 +223,85 @@ const TopNavigation = (props: {
   );
 };
 
-const TextContainer = ({ leftText, rightText, onPress }) => (
+interface TextContainerProps {
+  leftText: string;
+  rightText: string;
+  onPress: () => void;
+}
+const TextContainer = (props: TextContainerProps) => (
   <TouchableOpacity
-    onPress={() => onPress()}
+    onPress={() => props.onPress()}
     style={styles.textContainer}
     activeOpacity={1}
   >
     <AppText fontWeight="Medium" style={styles.containerText}>
-      {leftText}
+      {props.leftText}
     </AppText>
-    <AppText style={styles.containerText}>{rightText}</AppText>
+    <AppText style={styles.containerText}>{props.rightText}</AppText>
   </TouchableOpacity>
 );
 
-const SelectableContainerText = ({ label, value, selected, onPress }) => (
-  <TouchableOpacity style={styles.selectors} onPress={() => onPress(value)}>
-    <AppText style={styles.containerText}>{label}</AppText>
-    {selected ? (
-      <Icon name="check" type="feather" color={colors.black} size={15} />
+interface SelectableContainerTextProps {
+  label: string;
+  selected: boolean;
+  onPress: () => void;
+}
+const SelectableContainerText = (props: SelectableContainerTextProps) => (
+  <TouchableOpacity style={styles.selectors} onPress={() => props.onPress()}>
+    <AppText style={styles.containerText}>{props.label}</AppText>
+    {props.selected ? (
+      <Icon name="check" type="feather" color={colors.blue800} size={15} />
     ) : null}
   </TouchableOpacity>
 );
 
-const BottomNavigation = (props: { onPress: () => void; text?: string }) => (
-  <TouchableOpacity
-    onPress={() => props.onPress()}
-    style={styles.bottomNavigation}
-  >
-    <Icon name="chevron-left" type="feather" color={colors.blue800} size={24} />
-    <AppText
-      fontWeight="SemiBold"
-      style={{ fontSize: 18, color: colors.blue800 }}
-      children={props.text || "Back"}
-    />
-  </TouchableOpacity>
+interface BottomNavigationProps {
+  onPress: () => void;
+  text?: string;
+}
+const BottomNavigation = (props: BottomNavigationProps) => (
+  <View>
+    <TouchableOpacity
+      onPress={() => props.onPress()}
+      style={styles.bottomNavigation}
+    >
+      <Icon
+        name="chevron-left"
+        type="feather"
+        color={colors.blue800}
+        size={24}
+      />
+      <AppText
+        fontWeight="SemiBold"
+        style={{ fontSize: 18, color: colors.blue800 }}
+        children={props.text || "Back"}
+      />
+    </TouchableOpacity>
+  </View>
 );
-const Tabs = (props: { children: React.ReactNode }) => {
-  const count = React.Children.count(props.children);
-  const activeBarLength = Math.floor(100 / count);
-  const activeBarPlacement = activeBarLength * (count - 1);
 
-  const ActiveBar = () => (
-    <>
-      <View
-        style={{
-          width: `${activeBarPlacement}%`,
-          height: 1,
-          backgroundColor: colors.blue200
-        }}
-      />
-      <View
-        style={{
-          width: `${activeBarLength}%`,
-          height: 3,
-          backgroundColor: colors.focused
-        }}
-      />
-    </>
-  );
-  return (
-    <View>
-      <ActiveBar />
-      <View style={{ flexDirection: "row" }}>{props.children}</View>
-    </View>
-  );
-};
-
-const Tab = (props: {
+interface TabProps {
   topText: string;
   bottomText: string;
   onPress: () => void;
-  active: boolean;
-}) => (
+  variant: "focused" | "default";
+}
+const Tab = (props: TabProps) => (
   <TouchableOpacity
-    style={[
-      styles.tabsContainer,
-      props.active
-        ? null
-        : {
-            borderTopColor: colors.blue200,
-            backgroundColor: colors.white,
-            borderTopWidth: 1
-          }
-    ]}
+    style={styles[`${props.variant || "default"}TabsContainer`]}
     onPress={() => props.onPress()}
   >
     <AppText
       fontWeight="Medium"
       style={{
-        color: props.active ? colors.blue800 : colors.blue500
+        color: props.variant === "focused" ? colors.blue800 : colors.blue500
       }}
       children={props.topText}
     />
     <AppText
       fontWeight="Bold"
       style={{
-        color: props.active ? colors.blue800 : colors.blue500
+        color: props.variant === "focused" ? colors.blue800 : colors.blue500
       }}
       children={props.bottomText}
     />
@@ -272,11 +310,11 @@ const Tab = (props: {
 
 export {
   Button,
+  BackgroundImage,
   TopNavigation,
   TextContainer,
   SelectableContainerText,
   BottomNavigation,
-  Tabs,
   Tab,
   AppText
 };
