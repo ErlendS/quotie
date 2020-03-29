@@ -58,17 +58,14 @@ async function getUserNotificationSettings() {
 }
 interface RegisterForPushNotificationsAsyncProps {
   userNotificationRequest: UserDataT;
-  onSuccess?: () => void;
+  onSuccess: () => void;
 }
 async function registerForPushNotificationsAsync(
   props: RegisterForPushNotificationsAsyncProps
 ) {
-  console.log("everything is fine");
-
   const { status: existingStatus } = await Permissions.getAsync(
     Permissions.NOTIFICATIONS
   );
-  console.log("status", status);
 
   let finalStatus = existingStatus;
 
@@ -92,7 +89,6 @@ async function registerForPushNotificationsAsync(
       data: props.userNotificationRequest
     })
   });
-  console.log("respone is:", response.ok);
   if (response.ok) {
     return props.onSuccess();
   } else return;
