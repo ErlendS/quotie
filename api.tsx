@@ -1,6 +1,7 @@
 import quotes from "./quotes";
 import db from "./firebase";
-import { Permissions, Notifications } from "expo";
+import { Notifications } from "expo";
+import * as Permissions from "expo-permissions";
 import { UserDataT } from "./types";
 
 function importQuotes() {
@@ -13,17 +14,17 @@ function importQuotes() {
   );
 }
 
-const PUSH_ENDPOINT =
+const SET_SUBSCRIPTION_ENDPOINT =
   "https://europe-west1-quotie-quotie.cloudfunctions.net/setSubscription";
 
-const PUSH_ENDPOINT2 =
+const SEND_NOTIFICATION_ENDPOINT =
   "https://europe-west1-quotie-quotie.cloudfunctions.net/sendNotificationToSubscribedMembers";
 
-const PUSH_POINT_USER_DATA =
+const GET_USER_SETTINGS_ENDPOINT =
   "https://europe-west1-quotie-quotie.cloudfunctions.net/getUserNotificationSettings";
 
-async function testFn() {
-  await fetch(PUSH_ENDPOINT2, {
+async function sendNotifications() {
+  await fetch(SEND_NOTIFICATION_ENDPOINT, {
     method: "GET",
     headers: {
       Accept: "application/json",
@@ -35,7 +36,9 @@ async function testFn() {
 async function getUserNotificationSettings() {
   try {
     let token = await Notifications.getExpoPushTokenAsync();
-    const res = await fetch(PUSH_POINT_USER_DATA, {
+    console.log("token: ", token);
+
+    const res = await fetch(GET_USER_SETTINGS_ENDPOINT, {
       method: "POST",
       headers: {
         Accept: "application/json",
@@ -43,21 +46,30 @@ async function getUserNotificationSettings() {
       },
       body: JSON.stringify({ token })
     });
+
     if (res.status === 200) {
       return res.json().then(data => data as UserDataT);
     }
   } catch (error) {
+    console.warn("something went horribly wrong, so, so many are dead");
+
     console.error(error);
   }
 }
-
+interface RegisterForPushNotificationsAsyncProps {
+  userNotificationRequest: UserDataT;
+  onSuccess?: () => void;
+}
 async function registerForPushNotificationsAsync(
-  userNotificationRequest,
-  onSuccess
+  props: RegisterForPushNotificationsAsyncProps
 ) {
+  console.log("everything is fine");
+
   const { status: existingStatus } = await Permissions.getAsync(
     Permissions.NOTIFICATIONS
   );
+  console.log("status", status);
+
   let finalStatus = existingStatus;
 
   if (existingStatus !== "granted") {
@@ -69,7 +81,7 @@ async function registerForPushNotificationsAsync(
   }
   let token = await Notifications.getExpoPushTokenAsync();
 
-  const response = await fetch(PUSH_ENDPOINT, {
+  const response = await fetch(SET_SUBSCRIPTION_ENDPOINT, {
     method: "POST",
     headers: {
       Accept: "application/json",
@@ -77,23 +89,17 @@ async function registerForPushNotificationsAsync(
     },
     body: JSON.stringify({
       token,
-      data: userNotificationRequest
+      data: props.userNotificationRequest
     })
   });
   console.log("respone is:", response.ok);
   if (response.ok) {
-    return onSuccess();
+    return props.onSuccess();
   } else return;
 }
 
-const GetUserNotificationSettings = (props: {
-  startTime: string;
-  endTime: string;
-  frequency: string;
-  subscriptionIsOn: boolean;
-}) => ({
-  startTime: props.startTime,
-  endTime: props.endTime,
-  frequency: props.frequency,
-  subscriptionIsOn: props.subscriptionIsOn
-});
+export {
+  getUserNotificationSettings,
+  registerForPushNotificationsAsync,
+  sendNotifications
+};

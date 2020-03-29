@@ -86,11 +86,11 @@ const Home = (props: {
       <View
         style={{ flex: 1, justifyContent: "flex-end", alignItems: "center" }}
       >
-        {props.userData.reminderEnabled && (
+        {props.userData.subscriptionIsOn && (
           <ShowReminder userData={props.userData} setScreen={props.setScreen} />
         )}
 
-        {!props.userData.reminderEnabled && (
+        {!props.userData.subscriptionIsOn && (
           <AppText
             style={{ color: colors.blue800, fontSize: 24, marginBottom: 48 }}
             fontWeight="SemiBold"
@@ -100,10 +100,10 @@ const Home = (props: {
       </View>
       <View style={[styles.center, { marginBottom: 48 }]}>
         <Button
-          text={props.userData.reminderEnabled ? "Edit" : "Set Reminder"}
+          text={props.userData.subscriptionIsOn ? "Edit" : "Set Reminder"}
           onPress={() => props.setScreen("setReminder")}
         />
-        {props.userData.reminderEnabled && (
+        {props.userData.subscriptionIsOn && (
           <Button
             variant="secondary"
             text="Cancel Reminder"

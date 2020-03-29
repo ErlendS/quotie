@@ -11,6 +11,7 @@ import {
 } from "../components";
 import { colors, spacing } from "../theme";
 import { stringifyFrequency } from "../variables";
+import { registerForPushNotificationsAsync } from "../api";
 
 const styles = StyleSheet.create({
   container: {
@@ -40,7 +41,7 @@ const styles = StyleSheet.create({
 const ReminderScreen = (props: {
   userData: UserDataT;
   setScreen: SetScreenFn;
-  setReminderEnabled: React.Dispatch<React.SetStateAction<boolean>>;
+  setSubscriptionIsOn: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
   return (
     <View style={styles.container}>
@@ -69,7 +70,19 @@ const ReminderScreen = (props: {
         <Button
           text="Set Reminder"
           onPress={() => {
-            props.setScreen("home"), props.setReminderEnabled(true);
+            const { startTime, endTime, frequency } = props.userData;
+            registerForPushNotificationsAsync({
+              userNotificationRequest: {
+                startTime,
+                endTime,
+                frequency,
+                subscriptionIsOn: true
+              },
+              onSuccess: () => {
+                props.setSubscriptionIsOn(true);
+                props.setScreen("home");
+              }
+            });
           }}
         />
       </ScrollView>

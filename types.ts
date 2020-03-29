@@ -4,5 +4,5 @@ export interface UserDataT {
   startTime: Date;
   endTime: Date;
   frequency: number;
-  reminderEnabled: boolean;
+  subscriptionIsOn: boolean;
 }

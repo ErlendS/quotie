@@ -10,15 +10,17 @@
     "logs": "firebase functions:log"
   },
   "dependencies": {
-    "firebase-admin": "~7.0.0",
-    "firebase-functions": "^2.2.0",
     "date-fns": "1.30.1",
-    "expo-server-sdk": "3.2.0"
+    "expo-server-sdk": "3.2.0",
+    "firebase-admin": "8.10.0",
+    "firebase-functions": "3.5.0"
   },
   "devDependencies": {
     "eslint": "^5.12.0",
     "eslint-plugin-promise": "^4.0.1"
   },
   "private": true,
-  "engines": {"node": "8"}
+  "engines": {
+    "node": "8"
+  }
 }

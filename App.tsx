@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import * as dateFns from "date-fns";
 
 import { UserDataT, ScreensT } from "./types";
@@ -6,47 +6,40 @@ import ReminderScreen from "./Screens/ReminderScreen";
 import Home from "./Screens/Home";
 import FrequencyScreen from "./Screens/FrequencyScreen";
 import BetweenScreen from "./Screens/BetweenScreen";
-import { useLoadFonts } from "./theme";
-
-const setInitalTime = () => {
-  const currentTime = dateFns.startOfHour(new Date());
-  const offsetTime = dateFns.getHours(dateFns.subHours(currentTime, 9));
-  const initalTime = dateFns.subHours(currentTime, offsetTime);
-  return initalTime;
-};
+import { useLoadFonts, useGetUserNotificationSettings } from "./theme";
+import { registerForPushNotificationsAsync } from "./api";
 
 const App = () => {
-  const [reminderEnabled, setReminderEnabled] = React.useState(true);
   const [screen, setScreen] = React.useState<ScreensT>("home");
-  const [frequency, setFrequency] = React.useState(60);
-  const [startTime, setStartTime] = React.useState(setInitalTime());
-  const [endTime, setEndTime] = React.useState(
-    dateFns.addHours(setInitalTime(), 12)
-  );
   const fontLoaded = useLoadFonts();
-  // React.useEffect(() => {
-  //   getUserNotificationSettings()
-  //     .then(userData => {
-  //       if (userData) {
-  //         setStartTime(userData.startTime);
-  //         setEndTime(userData.endTime);
-  //         setFrequency(userData.frequency);
-  //       }
-  //     })
-  //     .catch(error => console.error(error));
-  // }, []);
-  const userData: UserDataT = {
+  const userCurrentSettings = useGetUserNotificationSettings();
+
+  const [frequency, setFrequency] = React.useState(
+    userCurrentSettings.frequency
+  );
+  const [startTime, setStartTime] = React.useState(
+    userCurrentSettings.startTime
+  );
+  const [endTime, setEndTime] = React.useState(userCurrentSettings.endTime);
+  const [subscriptionIsOn, setSubscriptionIsOn] = React.useState(
+    userCurrentSettings.subscriptionIsOn
+  );
+  const userNewSettings: UserDataT = {
     frequency,
     startTime,
     endTime,
-    reminderEnabled
+    subscriptionIsOn
   };
+  React.useEffect(() => {
+    setSubscriptionIsOn(userCurrentSettings.subscriptionIsOn);
+  }, [userCurrentSettings]);
+
   if (screen === "setReminder") {
     return (
       <ReminderScreen
         setScreen={setScreen}
-        userData={userData}
-        setReminderEnabled={setReminderEnabled}
+        userData={userNewSettings}
+        setSubscriptionIsOn={setSubscriptionIsOn}
       />
     );
   }
@@ -56,7 +49,7 @@ const App = () => {
         setEndTime={setEndTime}
         setStartTime={setStartTime}
         setScreen={setScreen}
-        userData={userData}
+        userData={userNewSettings}
       />
     );
   }
@@ -64,7 +57,7 @@ const App = () => {
     return (
       <FrequencyScreen
         setScreen={setScreen}
-        userData={userData}
+        userData={userNewSettings}
         frequency={frequency}
         setFrequency={setFrequency}
       />
@@ -73,8 +66,18 @@ const App = () => {
     return fontLoaded ? (
       <Home
         setScreen={setScreen}
-        userData={userData}
-        cancelReminder={() => setReminderEnabled(false)}
+        userData={userNewSettings}
+        cancelReminder={() =>
+          registerForPushNotificationsAsync({
+            userNotificationRequest: {
+              startTime,
+              endTime,
+              frequency,
+              subscriptionIsOn: false
+            },
+            onSuccess: () => setSubscriptionIsOn(false)
+          })
+        }
       />
     ) : null;
   }

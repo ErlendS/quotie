@@ -1,5 +1,9 @@
 import * as React from "react";
 import * as Font from "expo-font";
+import * as dateFns from "date-fns";
+
+import { getUserNotificationSettings } from "./api";
+import { UserDataT } from "./types";
 
 export const colors = {
   blue900: "#27414E",
@@ -50,5 +54,41 @@ export const useLoadFonts = () => {
         console.warn("So sorry, something went wrong loading the fonts");
       });
   }, []);
+  // console.log("font loaded - ", fontLoaded);
+
   return fontLoaded;
+};
+
+const setInitalTime = () => {
+  const currentTime = dateFns.startOfHour(new Date());
+  const offsetTime = dateFns.getHours(dateFns.subHours(currentTime, 9));
+  const initalTime = dateFns.subHours(currentTime, offsetTime);
+  return initalTime;
+};
+
+export const useGetUserNotificationSettings = () => {
+  const [frequency, setFrequency] = React.useState(60);
+  const [startTime, setStartTime] = React.useState(setInitalTime());
+  const [endTime, setEndTime] = React.useState(
+    dateFns.addHours(setInitalTime(), 12)
+  );
+  const [subscriptionIsOn, setSubscriptionIsOn] = React.useState(false);
+
+  React.useEffect(() => {
+    getUserNotificationSettings()
+      .then(userData => {
+        if (userData) {
+          setStartTime(userData.startTime);
+          setEndTime(userData.endTime);
+          setFrequency(userData.frequency);
+          setSubscriptionIsOn(userData.subscriptionIsOn);
+        }
+      })
+      .catch(error => {
+        console.error(error);
+      });
+  }, []);
+  // console.log("subscriptionIsOn - ", subscriptionIsOn);
+
+  return { frequency, startTime, endTime, subscriptionIsOn } as UserDataT;
 };
