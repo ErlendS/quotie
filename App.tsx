@@ -31,8 +31,11 @@ const App = () => {
     subscriptionIsOn
   };
   React.useEffect(() => {
+    setEndTime(userCurrentSettings.endTime);
+    setFrequency(userCurrentSettings.frequency);
+    setStartTime(userCurrentSettings.startTime);
     setSubscriptionIsOn(userCurrentSettings.subscriptionIsOn);
-  }, [userCurrentSettings]);
+  }, [userCurrentSettings, endTime, frequency, startTime]);
 
   if (screen === "setReminder") {
     return (
