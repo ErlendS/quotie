@@ -46,7 +46,6 @@ const BetweenScreen = (props: {
   const [toggleTimePicker, settoggleTimePicker] = useState<"start" | "end">(
     "start"
   );
-  console.log("userdata", props.userData);
 
   return (
     <View style={styles.container}>
@@ -71,36 +70,16 @@ const BetweenScreen = (props: {
               />
             </React.Fragment>
           )}
-          {/* {toggleTimePicker === "end" && (
+          {toggleTimePicker === "end" && (
             <React.Fragment>
               <DateTimePicker
-                date={props.userData.endTime}
-                onDateChange={props.setEndTime}
-                mode="time"
-                minuteInterval={10}
-              />
-            </React.Fragment>
-          )} */}
-          {/* {toggleTimePicker === "start" && (
-            <React.Fragment>
-              <DatePickerIOS
-                date={props.userData.startTime}
-                onDateChange={props.setStartTime}
+                value={props.userData.endTime}
+                onChange={() => props.setEndTime}
                 mode="time"
                 minuteInterval={10}
               />
             </React.Fragment>
           )}
-          {toggleTimePicker === "end" && (
-            <React.Fragment>
-              <DatePickerIOS
-                date={props.userData.endTime}
-                onDateChange={props.setEndTime}
-                mode="time"
-                minuteInterval={10}
-              />
-            </React.Fragment>
-          )} */}
           <View style={{ flexDirection: "row" }}>
             <Tab
               topText="Start"
