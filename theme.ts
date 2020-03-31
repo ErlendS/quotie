@@ -1,9 +1,9 @@
 import * as React from "react";
 import * as Font from "expo-font";
 import * as dateFns from "date-fns";
+import * as lodash from "lodash";
 
-import { getUserNotificationSettings } from "./api";
-import { UserDataT } from "./types";
+import { UserSettingsT } from "./types";
 
 export const colors = {
   blue900: "#27414E",
@@ -54,41 +54,53 @@ export const useLoadFonts = () => {
         console.warn("So sorry, something went wrong loading the fonts");
       });
   }, []);
-  // console.log("font loaded - ", fontLoaded);
 
   return fontLoaded;
 };
 
-const setInitalTime = () => {
+export const setInitalTime = () => {
   const currentTime = dateFns.startOfHour(new Date());
   const offsetTime = dateFns.getHours(dateFns.subHours(currentTime, 9));
   const initalTime = dateFns.subHours(currentTime, offsetTime);
   return initalTime;
 };
+export const getDefaultUserSettings = (): UserSettingsT => ({
+  frequency: 60,
+  startTime: setInitalTime(),
+  endTime: dateFns.addHours(setInitalTime(), 12),
+  subscriptionIsOn: false
+});
 
-export const useGetUserNotificationSettings = () => {
-  const [frequency, setFrequency] = React.useState(60);
-  const [startTime, setStartTime] = React.useState(setInitalTime());
-  const [endTime, setEndTime] = React.useState(
-    dateFns.addHours(setInitalTime(), 12)
+interface SetUserStateFnT {
+  (updatedValues: Partial<UserSettingsT>): void; // this is the function signature
+  // the following are properties on this function.
+  setSubscriptionIsOn: (subscriptionIsOn: boolean) => void;
+  setStartTime: (startTime: Date) => void;
+  setEndTime: (endTime: Date) => void;
+  setFrequency: (frequency: number) => void;
+}
+export const useUserSettingForm = (
+  currentValue: UserSettingsT
+): [UserSettingsT, SetUserStateFnT] => {
+  const [userState, _setUserState] = React.useState<UserSettingsT>(
+    currentValue
   );
-  const [subscriptionIsOn, setSubscriptionIsOn] = React.useState(false);
-
   React.useEffect(() => {
-    getUserNotificationSettings()
-      .then(userData => {
-        if (userData) {
-          setStartTime(userData.startTime);
-          setEndTime(userData.endTime);
-          setFrequency(userData.frequency);
-          setSubscriptionIsOn(userData.subscriptionIsOn);
-        }
-      })
-      .catch(error => {
-        console.error(error);
-      });
-  }, []);
-  // console.log("subscriptionIsOn - ", subscriptionIsOn);
+    _setUserState(currentValue);
+  }, [currentValue]);
 
-  return { frequency, startTime, endTime, subscriptionIsOn } as UserDataT;
+  const setUserState = React.useMemo((): SetUserStateFnT => {
+    const setUserForm = function(updatedValues: Partial<UserSettingsT>) {
+      _setUserState(prevValues =>
+        lodash.defaults({ ...updatedValues }, prevValues)
+      );
+    } as SetUserStateFnT;
+    setUserForm.setSubscriptionIsOn = subscriptionIsOn =>
+      setUserForm({ subscriptionIsOn });
+    setUserForm.setStartTime = startTime => setUserForm({ startTime });
+    setUserForm.setEndTime = endTime => setUserForm({ endTime });
+    setUserForm.setFrequency = frequency => setUserForm({ frequency });
+    return setUserForm;
+  }, []);
+  return [userState, setUserState];
 };

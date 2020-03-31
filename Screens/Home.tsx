@@ -2,7 +2,7 @@ import React from "react";
 import { View, StyleSheet, Alert } from "react-native";
 import * as dateFns from "date-fns";
 
-import { UserDataT, SetScreenFn } from "../types";
+import { UserSettingsT, SetScreenFn } from "../types";
 import { colors, spacing } from "../theme";
 import { Button, TopNavigation, AppText, BackgroundImage } from "../components";
 
@@ -40,7 +40,7 @@ function stringifyFrequency(frequency) {
   if (frequency === 360) return "6 hrs";
 }
 
-const ReminderText = (props: { userData: UserDataT }) => (
+const ReminderText = (props: { userData: UserSettingsT }) => (
   <AppText style={styles.textWrapper}>
     <AppText>A quote will be sent every</AppText>
     <AppText
@@ -61,7 +61,7 @@ const ReminderText = (props: { userData: UserDataT }) => (
 );
 
 const ShowReminder = (props: {
-  userData: UserDataT;
+  userData: UserSettingsT;
   setScreen: SetScreenFn;
 }) => (
   <>
@@ -75,7 +75,7 @@ const ShowReminder = (props: {
 );
 
 const Home = (props: {
-  userData: UserDataT;
+  userData: UserSettingsT;
   setScreen: SetScreenFn;
   cancelReminder: () => void;
 }) => {

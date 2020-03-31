@@ -1,58 +1,58 @@
-import React, { useEffect } from "react";
-import * as dateFns from "date-fns";
+import * as React from "react";
 
-import { UserDataT, ScreensT } from "./types";
-import ReminderScreen from "./Screens/ReminderScreen";
+import { UserSettingsT, ScreensT } from "./types";
 import Home from "./Screens/Home";
+import {
+  useLoadFonts,
+  getDefaultUserSettings,
+  useUserSettingForm
+} from "./theme";
+import {
+  registerForPushNotificationsAsync,
+  getUserNotificationSettings
+} from "./api";
+
+import ReminderScreen from "./Screens/ReminderScreen";
 import FrequencyScreen from "./Screens/FrequencyScreen";
 import BetweenScreen from "./Screens/BetweenScreen";
-import { useLoadFonts, useGetUserNotificationSettings } from "./theme";
-import { registerForPushNotificationsAsync } from "./api";
 
-const App = () => {
+const App = (props: {
+  userSettings: UserSettingsT;
+  refetchUserSettings: () => void;
+}) => {
   const [screen, setScreen] = React.useState<ScreensT>("home");
-  const fontLoaded = useLoadFonts();
-  const userCurrentSettings = useGetUserNotificationSettings();
 
-  const [frequency, setFrequency] = React.useState(
-    userCurrentSettings.frequency
-  );
-  const [startTime, setStartTime] = React.useState(
-    userCurrentSettings.startTime
-  );
-  const [endTime, setEndTime] = React.useState(userCurrentSettings.endTime);
-  const [subscriptionIsOn, setSubscriptionIsOn] = React.useState(
-    userCurrentSettings.subscriptionIsOn
-  );
-  const userNewSettings: UserDataT = {
-    frequency,
-    startTime,
-    endTime,
-    subscriptionIsOn
+  const [userForm, setUserForm] = useUserSettingForm(props.userSettings);
+  const handleUpdateUserSettings = () => {
+    //optimistc update, remember to handle errors.
+    setUserForm.setSubscriptionIsOn(true);
+    registerForPushNotificationsAsync({
+      userNotificationRequest: {
+        ...userForm,
+        subscriptionIsOn: true
+      },
+      onSuccess: () => {
+        setScreen("home");
+        props.refetchUserSettings();
+      }
+    });
   };
-  React.useEffect(() => {
-    setEndTime(userCurrentSettings.endTime);
-    setFrequency(userCurrentSettings.frequency);
-    setStartTime(userCurrentSettings.startTime);
-    setSubscriptionIsOn(userCurrentSettings.subscriptionIsOn);
-  }, [userCurrentSettings, endTime, frequency, startTime]);
-
   if (screen === "setReminder") {
     return (
       <ReminderScreen
         setScreen={setScreen}
-        userData={userNewSettings}
-        setSubscriptionIsOn={setSubscriptionIsOn}
+        userData={userForm}
+        onSubmit={handleUpdateUserSettings}
       />
     );
   }
   if (screen === "setBetween") {
     return (
       <BetweenScreen
-        setEndTime={setEndTime}
-        setStartTime={setStartTime}
+        setEndTime={setUserForm.setEndTime}
+        setStartTime={setUserForm.setStartTime}
         setScreen={setScreen}
-        userData={userNewSettings}
+        userData={userForm}
       />
     );
   }
@@ -60,30 +60,55 @@ const App = () => {
     return (
       <FrequencyScreen
         setScreen={setScreen}
-        userData={userNewSettings}
-        frequency={frequency}
-        setFrequency={setFrequency}
+        userData={userForm}
+        setFrequency={setUserForm.setFrequency}
       />
     );
   } else {
-    return fontLoaded ? (
+    return (
       <Home
         setScreen={setScreen}
-        userData={userNewSettings}
+        userData={userForm}
         cancelReminder={() =>
           registerForPushNotificationsAsync({
             userNotificationRequest: {
-              startTime,
-              endTime,
-              frequency,
+              ...userForm,
               subscriptionIsOn: false
             },
-            onSuccess: () => setSubscriptionIsOn(false)
+            onSuccess: () => setUserForm.setSubscriptionIsOn(false)
           })
         }
       />
-    ) : null;
+    );
   }
 };
 
-export default App;
+export default function Root() {
+  const fontLoaded = useLoadFonts();
+  const [userSettings, setUserSettings] = React.useState<
+    UserSettingsT | undefined
+  >(undefined);
+
+  //TODO set firebase subscription instead of fetchUserSettings
+  const fetchUserSettings = React.useCallback(() => {
+    getUserNotificationSettings()
+      .then(userSettings => {
+        if (userSettings) {
+          setUserSettings(userSettings);
+        } else {
+          setUserSettings(getDefaultUserSettings());
+        }
+      })
+      .catch(error => {
+        console.error(error);
+      });
+  }, []);
+
+  React.useEffect(() => {
+    fetchUserSettings();
+  }, [fetchUserSettings]);
+
+  return fontLoaded && userSettings ? (
+    <App userSettings={userSettings} refetchUserSettings={fetchUserSettings} />
+  ) : null;
+}

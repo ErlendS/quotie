@@ -1,6 +1,6 @@
 import React from "react";
 import { View, StyleSheet, ScrollView, Image } from "react-native";
-import { UserDataT, SetScreenFn } from "../types";
+import { UserSettingsT, SetScreenFn } from "../types";
 import {
   TopNavigation,
   SelectableContainerText,
@@ -57,9 +57,8 @@ const frequencyOptions = [
 
 const FrequencyScreen = (props: {
   setScreen: SetScreenFn;
-  frequency: number;
   setFrequency: (value: number) => void;
-  userData: UserDataT;
+  userData: UserSettingsT;
 }) => {
   return (
     <View style={styles.container}>

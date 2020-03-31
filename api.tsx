@@ -2,7 +2,7 @@ import quotes from "./quotes";
 import db from "./firebase";
 import { Notifications } from "expo";
 import * as Permissions from "expo-permissions";
-import { UserDataT } from "./types";
+import { UserSettingsT } from "./types";
 
 function importQuotes() {
   quotes.map(quoteObj =>
@@ -36,7 +36,6 @@ async function sendNotifications() {
 async function getUserNotificationSettings() {
   try {
     let token = await Notifications.getExpoPushTokenAsync();
-    console.log("token: ", token);
 
     const res = await fetch(GET_USER_SETTINGS_ENDPOINT, {
       method: "POST",
@@ -48,7 +47,7 @@ async function getUserNotificationSettings() {
     });
 
     if (res.status === 200) {
-      return res.json().then(data => data as UserDataT);
+      return res.json().then(data => data as UserSettingsT);
     }
   } catch (error) {
     console.warn("something went horribly wrong, so, so many are dead");
@@ -57,7 +56,7 @@ async function getUserNotificationSettings() {
   }
 }
 interface RegisterForPushNotificationsAsyncProps {
-  userNotificationRequest: UserDataT;
+  userNotificationRequest: UserSettingsT;
   onSuccess: () => void;
 }
 async function registerForPushNotificationsAsync(
