@@ -121,7 +121,7 @@ const styles = StyleSheet.create({
   },
   oneThirdPlacement: {
     position: "absolute",
-    top: "15%",
+    top: 20,
     left: 0,
     right: 0,
     bottom: 0,
@@ -136,7 +136,7 @@ interface AppTextProps {
   style?: TextStyle | TextStyle[];
   fontWeight?: FontWeightVariants;
 }
-const AppText = (props: AppTextProps) => {
+export const AppText = (props: AppTextProps) => {
   const fontType = !props.fontWeight ? "Regular" : props.fontWeight;
   return (
     <Text style={[{ fontFamily: `Montserrat-${fontType}` }, props.style]}>
@@ -145,7 +145,7 @@ const AppText = (props: AppTextProps) => {
   );
 };
 
-const Button = (props: {
+export const Button = (props: {
   text: string;
   onPress: () => void;
   variant?: "primary" | "secondary";
@@ -171,14 +171,10 @@ interface BackgroundImageProps {
   percentageOfScreenWidth?: number;
   placement?: "center" | "oneThird";
 }
-const BackgroundImage = (props: BackgroundImageProps) => {
-  const RATIO = 1.5;
+export const BackgroundImage = (props: BackgroundImageProps) => {
   const PERCENTAGE_OF_SCREEN_WIDTH = props.percentageOfScreenWidth || 0.7;
-
   const screenWidth = Math.round(Dimensions.get("window").width);
-
   const imgWidth = screenWidth * PERCENTAGE_OF_SCREEN_WIDTH;
-  const imgHeight = imgWidth * RATIO;
 
   return (
     <View
@@ -189,7 +185,7 @@ const BackgroundImage = (props: BackgroundImageProps) => {
     >
       <Image
         source={require("./assets/statue_head.png")}
-        style={{ width: imgWidth, height: imgHeight }}
+        style={{ width: imgWidth, resizeMode: 'contain' }}
       />
     </View>
   );
@@ -201,7 +197,7 @@ interface TopNavigationProps {
   rightIcon?: React.ReactNode;
   textSize?: "small" | "medium";
 }
-const TopNavigation = (props: TopNavigationProps) => {
+export const TopNavigation = (props: TopNavigationProps) => {
   const placeholder = (
     <View
       style={{
@@ -228,9 +224,9 @@ interface TextContainerProps {
   rightText: string;
   onPress: () => void;
 }
-const TextContainer = (props: TextContainerProps) => (
+export const TextContainer = (props: TextContainerProps) => (
   <TouchableOpacity
-    onPress={() => props.onPress()}
+    onPress={props.onPress}
     style={styles.textContainer}
     activeOpacity={1}
   >
@@ -246,8 +242,8 @@ interface SelectableContainerTextProps {
   selected: boolean;
   onPress: () => void;
 }
-const SelectableContainerText = (props: SelectableContainerTextProps) => (
-  <TouchableOpacity style={styles.selectors} onPress={() => props.onPress()}>
+export const SelectableContainerText = (props: SelectableContainerTextProps) => (
+  <TouchableOpacity style={styles.selectors} onPress={props.onPress}>
     <AppText style={styles.containerText}>{props.label}</AppText>
     {props.selected ? (
       <Icon name="check" type="feather" color={colors.blue800} size={15} />
@@ -259,10 +255,10 @@ interface BottomNavigationProps {
   onPress: () => void;
   text?: string;
 }
-const BottomNavigation = (props: BottomNavigationProps) => (
+export const BottomNavigation = (props: BottomNavigationProps) => (
   <View>
     <TouchableOpacity
-      onPress={() => props.onPress()}
+      onPress={ props.onPress}
       style={styles.bottomNavigation}
     >
       <Icon
@@ -286,7 +282,7 @@ interface TabProps {
   onPress: () => void;
   variant: "focused" | "default";
 }
-const Tab = (props: TabProps) => (
+export const Tab = (props: TabProps) => (
   <TouchableOpacity
     style={styles[`${props.variant || "default"}TabsContainer`]}
     onPress={() => props.onPress()}
@@ -307,14 +303,3 @@ const Tab = (props: TabProps) => (
     />
   </TouchableOpacity>
 );
-
-export {
-  Button,
-  BackgroundImage,
-  TopNavigation,
-  TextContainer,
-  SelectableContainerText,
-  BottomNavigation,
-  Tab,
-  AppText
-};
