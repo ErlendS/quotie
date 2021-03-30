@@ -3,7 +3,6 @@
     "name": "Quotie",
     "slug": "quotie",
     "privacy": "public",
-    "sdkVersion": "33.0.0",
     "platforms": [
       "ios",
       "android"
@@ -12,8 +11,8 @@
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "splash": {
-      "image": "./assets/statue_head.png",
-      "resizeMode": "contain",
+      "image": "./assets/stoic_head_l.png",
+      "resizeMode": "center",
       "backgroundColor": "#E8EEF1"
     },
     "updates": {

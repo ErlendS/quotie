@@ -2,10 +2,33 @@ const functions = require("firebase-functions");
 const admin = require("firebase-admin");
 const dateFns = require("date-fns");
 const { Expo } = require("expo-server-sdk");
+const firebase = require("firebase");
 
 let expo = new Expo();
 
 admin.initializeApp();
+
+// exports.setSubscription = functions
+//   .region("europe-west1")
+//   .https.onRequest((req, res) => {
+//     const payload = req.body;
+//     console.log("body is", payload);
+
+//     const snapshot = firebase
+//       .firestore()
+//       .collection("users")
+//       .doc(payload.token)
+//       .set(payload.data, { merge: true })
+//       .then(value => {
+//         console.log("firebase value");
+//         console.log(value);
+//         return res.status(200).send();
+//       })
+//       .catch(err => {
+//         console.error(err);
+//         return res.status(500).send();
+//       });
+//   });
 
 exports.setSubscription = functions
   .region("europe-west1")
@@ -98,8 +121,6 @@ exports.getUserNotificationSettings = functions
   .region("europe-west1")
   .https.onRequest((req, res) => {
     const payload = req.body;
-    console.log("body is", payload);
-
     return admin
       .firestore()
       .collection("users")
@@ -107,10 +128,10 @@ exports.getUserNotificationSettings = functions
       .get()
       .then(doc => {
         if (doc) {
-          return doc;
+          return res.status(200).json(doc.data());
         } else {
           console.log("No such document!");
-          return null;
+          return res.status(404).send("Sorry we did not find the document");
         }
       })
       .catch(err => console.error(err));
@@ -118,7 +139,7 @@ exports.getUserNotificationSettings = functions
 
 exports.scheduledPushNotifications = functions
   .region("europe-west1")
-  .pubsub.schedule(`every 10 minutes synchronized`)
+  .pubsub.schedule(`every 1 hours synchronized`)
   .onRun(async context => {
     try {
       const [quoteObj, userTokens] = await getQuoteAndUsersToNotify();
@@ -138,6 +159,10 @@ exports.scheduledPushNotifications = functions
         });
       }
       console.log("messages is: ", messages);
+      if (messages.length === 0) {
+        console.log("no scheduled notifications");
+        return;
+      }
       let chunks = expo.chunkPushNotifications(messages);
       let tickets = [];
       for (let chunk of chunks) {
@@ -153,3 +178,54 @@ exports.scheduledPushNotifications = functions
       console.error(error);
     }
   });
+
+  firebase.auth().signInAnonymously().catch(function(error) {
+    // Handle Errors here.
+    let errorCode = error.code;
+    let errorMessage = error.message;
+    // ...
+  });
+  
+
+// ----------------------------Handle push notifications receipts ----------------------------
+// let receiptIds = [];
+// for (let ticket of tickets) {
+//   // NOTE: Not all tickets have IDs; for example, tickets for notifications
+//   // that could not be enqueued will have error information and no receipt ID.
+//   if (ticket.id) {
+//     receiptIds.push(ticket.id);
+//   }
+// }
+
+// let receiptIdChunks = expo.chunkPushNotificationReceiptIds(receiptIds);
+// (async () => {
+//   // Like sending notifications, there are different strategies you could use
+//   // to retrieve batches of receipts from the Expo service.
+//   for (let chunk of receiptIdChunks) {
+//     try {
+//       let receipts = await expo.getPushNotificationReceiptsAsync(chunk);
+//       console.log(receipts);
+
+//       // The receipts specify whether Apple or Google successfully received the
+//       // notification and information about an error, if one occurred.
+//       for (const receiptId in receipts) {
+//         const { status, message, details } = receipts[receiptId];
+//         if (status === "ok") {
+//           continue;
+//         } else if (status === "error") {
+//           console.error(
+//             `There was an error sending a notification: ${message}`
+//           );
+//           if (details && details.error) {
+//             // The error codes are listed in the Expo documentation:
+//             // https://docs.expo.io/versions/latest/guides/push-notifications/#individual-errors
+//             // You must handle the errors appropriately.
+//             console.error(`The error code is ${details.error}`);
+//           }
+//         }
+//       }
+//     } catch (error) {
+//       console.error(error);
+//     }
+//   }
+// })

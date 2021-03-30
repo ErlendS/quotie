@@ -1,8 +1,9 @@
 import React, { useState } from "react";
-import { View, StyleSheet, DatePickerIOS, ScrollView } from "react-native";
+import { View, StyleSheet, ScrollView } from "react-native";
+import DateTimePicker from "@react-native-community/datetimepicker";
 import * as dateFns from "date-fns";
 
-import { UserDataT, SetScreenFn } from "../types";
+import { UserSettingsT, SetScreenFn } from "../types";
 import {
   TopNavigation,
   BottomNavigation,
@@ -40,11 +41,12 @@ const BetweenScreen = (props: {
   setScreen: SetScreenFn;
   setStartTime: (newTime: Date) => void;
   setEndTime: (newTime: Date) => void;
-  userData: UserDataT;
+  userData: UserSettingsT;
 }) => {
   const [toggleTimePicker, settoggleTimePicker] = useState<"start" | "end">(
     "start"
   );
+
   return (
     <View style={styles.container}>
       <TopNavigation textSize="small" centerText="Between" />
@@ -60,9 +62,11 @@ const BetweenScreen = (props: {
         <View style={styles.timePickerWrapper}>
           {toggleTimePicker === "start" && (
             <React.Fragment>
-              <DatePickerIOS
-                date={props.userData.startTime}
-                onDateChange={props.setStartTime}
+              <DateTimePicker
+                value={props.userData.startTime}
+                onChange={(event, selectedDate) =>
+                  props.setStartTime(selectedDate)
+                }
                 mode="time"
                 minuteInterval={10}
               />
@@ -70,9 +74,11 @@ const BetweenScreen = (props: {
           )}
           {toggleTimePicker === "end" && (
             <React.Fragment>
-              <DatePickerIOS
-                date={props.userData.endTime}
-                onDateChange={props.setEndTime}
+              <DateTimePicker
+                value={props.userData.endTime}
+                onChange={(event, selectedDate) =>
+                  props.setEndTime(selectedDate)
+                }
                 mode="time"
                 minuteInterval={10}
               />

@@ -1,8 +1,8 @@
 import React from "react";
-import { View, StyleSheet, Image, ScrollView } from "react-native";
+import { View, StyleSheet, ScrollView } from "react-native";
 import * as dateFns from "date-fns";
 
-import { UserDataT, SetScreenFn } from "../types";
+import { UserSettingsT, SetScreenFn } from "../types";
 import {
   TopNavigation,
   TextContainer,
@@ -38,10 +38,13 @@ const styles = StyleSheet.create({
 });
 
 const ReminderScreen = (props: {
-  userData: UserDataT;
+  userData: UserSettingsT;
   setScreen: SetScreenFn;
-  setReminderEnabled: React.Dispatch<React.SetStateAction<boolean>>;
+  onSubmit: () => void;
 }) => {
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const { startTime, endTime, frequency } = props.userData;
+
   return (
     <View style={styles.container}>
       <TopNavigation textSize="small" centerText="Set Reminder" />
@@ -54,22 +57,23 @@ const ReminderScreen = (props: {
         <View style={styles.actionsWrapper}>
           <TextContainer
             leftText="Repeat"
-            rightText={`Every ${stringifyFrequency(props.userData.frequency)}`}
+            rightText={`Every ${stringifyFrequency(frequency)}`}
             onPress={() => props.setScreen("setFrequency")}
           />
           <TextContainer
             leftText="Between"
             rightText={`${dateFns.format(
-              props.userData.startTime,
+              startTime,
               "HH:mm"
-            )} and ${dateFns.format(props.userData.endTime, "HH:mm")}`}
+            )} and ${dateFns.format(endTime, "HH:mm")}`}
             onPress={() => props.setScreen("setBetween")}
           />
         </View>
         <Button
-          text="Set Reminder"
+          text={isSubmitting ? "Setting..." : "Set Reminder"}
           onPress={() => {
-            props.setScreen("home"), props.setReminderEnabled(true);
+            isSubmitting ? null : setIsSubmitting(true);
+            !isSubmitting && props.onSubmit();
           }}
         />
       </ScrollView>

@@ -1,5 +1,9 @@
 import * as React from "react";
 import * as Font from "expo-font";
+import * as dateFns from "date-fns";
+import * as lodash from "lodash";
+
+import { UserSettingsT } from "./types";
 
 export const colors = {
   blue900: "#27414E",
@@ -16,6 +20,20 @@ export const colors = {
   focused: "#2D9CDB"
 };
 
+export const newColors = {
+  background: '#353B44',
+  white: "#FFFFFF",
+  buttonDark: '#2D323A',
+  text: '#CAC7FF',
+  favurite: '#FFB82D',
+  alert: '#E2CD96',
+  warning: '#F18A8A'
+  
+}
+export const gradients = {
+  primary: ['#7F6AFF', '#799FFF'], 
+  secondary: ['#7E74FF', '#7694F6']}
+
 export const spacing = [
   0, // 0
   4, // 1
@@ -26,7 +44,8 @@ export const spacing = [
   32, // 6
   52, // 7
   64, // 8
-  96 // 9
+  96, // 9
+  142 // 10
 ];
 
 export const fontSize = [12, 16, 24, 28, 32, 36];
@@ -50,5 +69,53 @@ export const useLoadFonts = () => {
         console.warn("So sorry, something went wrong loading the fonts");
       });
   }, []);
+
   return fontLoaded;
+};
+
+export const setInitalTime = () => {
+  const currentTime = dateFns.startOfHour(new Date());
+  const offsetTime = dateFns.getHours(dateFns.subHours(currentTime, 9));
+  const initalTime = dateFns.subHours(currentTime, offsetTime);
+  return initalTime;
+};
+export const getDefaultUserSettings = (): UserSettingsT => ({
+  frequency: 60,
+  startTime: setInitalTime(),
+  endTime: dateFns.addHours(setInitalTime(), 12),
+  subscriptionIsOn: false
+});
+
+interface SetUserStateFnT {
+  (updatedValues: Partial<UserSettingsT>): void; // this is the function signature
+  // the following are properties on this function.
+  setSubscriptionIsOn: (subscriptionIsOn: boolean) => void;
+  setStartTime: (startTime: Date) => void;
+  setEndTime: (endTime: Date) => void;
+  setFrequency: (frequency: number) => void;
+}
+export const useUserSettingForm = (
+  currentValue: UserSettingsT
+): [UserSettingsT, SetUserStateFnT] => {
+  const [userState, _setUserState] = React.useState<UserSettingsT>(
+    currentValue
+  );
+  React.useEffect(() => {
+    _setUserState(currentValue);
+  }, [currentValue]);
+
+  const setUserState = React.useMemo((): SetUserStateFnT => {
+    const setUserForm = function(updatedValues: Partial<UserSettingsT>) {
+      _setUserState(prevValues =>
+        lodash.defaults({ ...updatedValues }, prevValues)
+      );
+    } as SetUserStateFnT;
+    setUserForm.setSubscriptionIsOn = subscriptionIsOn =>
+      setUserForm({ subscriptionIsOn });
+    setUserForm.setStartTime = startTime => setUserForm({ startTime });
+    setUserForm.setEndTime = endTime => setUserForm({ endTime });
+    setUserForm.setFrequency = frequency => setUserForm({ frequency });
+    return setUserForm;
+  }, []);
+  return [userState, setUserState];
 };
