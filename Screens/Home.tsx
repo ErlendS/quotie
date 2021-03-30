@@ -1,15 +1,15 @@
 import React from "react";
-import { View, StyleSheet, Alert } from "react-native";
+import { View, StyleSheet, Alert, Text } from "react-native";
 import * as dateFns from "date-fns";
 
 import { UserSettingsT, SetScreenFn } from "../types";
-import { colors, spacing } from "../theme";
-import { Button, TopNavigation, AppText, BackgroundImage } from "../components";
+import { colors, newColors, spacing } from "../theme";
+import { Button, TopNavigation, AppText, BackgroundImage, Indent } from "../components";
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.blue100,
+    backgroundColor: newColors.background,
     alignItems: "center",
     justifyContent: "flex-start",
     paddingTop: spacing[5]
@@ -23,12 +23,12 @@ const styles = StyleSheet.create({
     marginBottom: 32,
     textAlign: "center",
     fontSize: 18,
-    color: colors.blue800
+    color: newColors.white
   },
   textHeader: {
     fontSize: 22,
     fontWeight: "700",
-    color: colors.blue800,
+    color: newColors.white,
     marginBottom: 12
   }
 });
@@ -60,6 +60,7 @@ const ReminderText = (props: { userData: UserSettingsT }) => (
   </AppText>
 );
 
+
 const ShowReminder = (props: {
   userData: UserSettingsT;
   setScreen: SetScreenFn;
@@ -81,13 +82,18 @@ const Home = (props: {
 }) => {
   return (
     <View style={styles.container}>
-      <TopNavigation centerText="Stoic Reminders" />
+      <TopNavigation centerText="Memento" />
       <BackgroundImage placement="oneThird" />
       <View
         style={{ flex: 1, justifyContent: "flex-end", alignItems: "center" }}
       >
+           <Indent> 
+             <AppText
+                         style={{ color: newColors.text, fontSize: 18, marginBottom: 48 }}
+                         > Hello </AppText> 
+           </Indent> 
         {props.userData.subscriptionIsOn && (
-          <ShowReminder userData={props.userData} setScreen={props.setScreen} />
+           <ShowReminder userData={props.userData} setScreen={props.setScreen} />
         )}
 
         {!props.userData.subscriptionIsOn && (

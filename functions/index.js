@@ -2,10 +2,33 @@ const functions = require("firebase-functions");
 const admin = require("firebase-admin");
 const dateFns = require("date-fns");
 const { Expo } = require("expo-server-sdk");
+const firebase = require("firebase");
 
 let expo = new Expo();
 
 admin.initializeApp();
+
+// exports.setSubscription = functions
+//   .region("europe-west1")
+//   .https.onRequest((req, res) => {
+//     const payload = req.body;
+//     console.log("body is", payload);
+
+//     const snapshot = firebase
+//       .firestore()
+//       .collection("users")
+//       .doc(payload.token)
+//       .set(payload.data, { merge: true })
+//       .then(value => {
+//         console.log("firebase value");
+//         console.log(value);
+//         return res.status(200).send();
+//       })
+//       .catch(err => {
+//         console.error(err);
+//         return res.status(500).send();
+//       });
+//   });
 
 exports.setSubscription = functions
   .region("europe-west1")
@@ -155,6 +178,14 @@ exports.scheduledPushNotifications = functions
       console.error(error);
     }
   });
+
+  firebase.auth().signInAnonymously().catch(function(error) {
+    // Handle Errors here.
+    let errorCode = error.code;
+    let errorMessage = error.message;
+    // ...
+  });
+  
 
 // ----------------------------Handle push notifications receipts ----------------------------
 // let receiptIds = [];

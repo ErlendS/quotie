@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import { Icon } from "react-native-elements";
 
-import { colors, spacing, fontSize } from "./theme";
+import { colors, spacing, fontSize, newColors } from "./theme";
 
 const styles = StyleSheet.create({
   containerText: {
@@ -91,15 +91,15 @@ const styles = StyleSheet.create({
     borderTopWidth: 1
   },
   title: {
-    color: colors.blue900,
+    color: newColors.white,
     fontSize: fontSize[5]
   },
   titleSmall: {
-    color: colors.blue900,
+    color: newColors.white,
     fontSize: fontSize[3]
   },
   topNavigationContainer: {
-    height: spacing[9],
+    height: spacing[10],
     flexDirection: "row",
     width: "100%",
     alignItems: "center",
@@ -121,11 +121,36 @@ const styles = StyleSheet.create({
   },
   oneThirdPlacement: {
     position: "absolute",
-    top: 20,
+    top: 120,
     left: 0,
     right: 0,
     bottom: 0,
     alignItems: "center"
+  },
+  indent: {
+    alignSelf: 'stretch',
+    marginHorizontal: 24,
+    minHeight: 60,
+    borderColor: newColors.background,
+    backgroundColor: 'transparent',
+    overflow: 'hidden',
+    shadowColor: 'black',
+    borderRadius: 30,
+    borderWidth: 1,
+    shadowRadius: 10,
+    shadowOpacity: 0.35,
+    shadowOffset: {height: 10, width: 10},
+  },
+  indentShadow:{
+    padding: 12,
+    borderColor: newColors.background,
+    backgroundColor: 'transparent',
+    shadowColor: '#B9B9B9',
+    borderRadius: 30,
+    borderWidth: 16,
+    shadowRadius: 10,
+    shadowOpacity: 0.13,
+    shadowOffset: {height: -10, width: -10},
   }
 });
 
@@ -144,6 +169,14 @@ export const AppText = (props: AppTextProps) => {
     </Text>
   );
 };
+
+export const Indent = (props) => (
+  <View style={styles.indent}>
+    <View style={styles.indentShadow}>
+    {props.children}
+    </View>
+  </View>
+)
 
 export const Button = (props: {
   text: string;
@@ -172,7 +205,7 @@ interface BackgroundImageProps {
   placement?: "center" | "oneThird";
 }
 export const BackgroundImage = (props: BackgroundImageProps) => {
-  const PERCENTAGE_OF_SCREEN_WIDTH = props.percentageOfScreenWidth || 0.7;
+  const PERCENTAGE_OF_SCREEN_WIDTH = props.percentageOfScreenWidth || 0.5;
   const screenWidth = Math.round(Dimensions.get("window").width);
   const imgWidth = screenWidth * PERCENTAGE_OF_SCREEN_WIDTH;
 
@@ -184,7 +217,7 @@ export const BackgroundImage = (props: BackgroundImageProps) => {
       ]}
     >
       <Image
-        source={require("./assets/statue_head.png")}
+        source={require("./assets/stoic_head_l.png")}
         style={{ width: imgWidth, resizeMode: 'contain' }}
       />
     </View>
@@ -209,7 +242,7 @@ export const TopNavigation = (props: TopNavigationProps) => {
     <View style={styles.topNavigationContainer}>
       {props.leftIcon ? props.leftIcon : placeholder}
       <AppText
-        fontWeight="SemiBold"
+        fontWeight="Medium"
         style={props.textSize === "small" ? styles.titleSmall : styles.title}
       >
         {props.centerText}

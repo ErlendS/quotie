@@ -20,6 +20,20 @@ export const colors = {
   focused: "#2D9CDB"
 };
 
+export const newColors = {
+  background: '#353B44',
+  white: "#FFFFFF",
+  buttonDark: '#2D323A',
+  text: '#CAC7FF',
+  favurite: '#FFB82D',
+  alert: '#E2CD96',
+  warning: '#F18A8A'
+  
+}
+export const gradients = {
+  primary: ['#7F6AFF', '#799FFF'], 
+  secondary: ['#7E74FF', '#7694F6']}
+
 export const spacing = [
   0, // 0
   4, // 1
@@ -30,7 +44,8 @@ export const spacing = [
   32, // 6
   52, // 7
   64, // 8
-  96 // 9
+  96, // 9
+  142 // 10
 ];
 
 export const fontSize = [12, 16, 24, 28, 32, 36];

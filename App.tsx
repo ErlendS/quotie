@@ -1,4 +1,5 @@
 import * as React from "react";
+import firebase from "firebase";
 
 import { UserSettingsT, ScreensT } from "./types";
 import Home from "./Screens/Home";
@@ -23,7 +24,46 @@ const App = (props: {
   const [screen, setScreen] = React.useState<ScreensT>("home");
 
   const [userForm, setUserForm] = useUserSettingForm(props.userSettings);
+
   const handleUpdateUserSettings = () => {
+    firebase.auth().signInAnonymously().then(() => {
+      firebase.auth().onAuthStateChanged(function(user) {
+        if (user) {
+          // User is signed in.
+          // recreate puh token for user everytime they set a new subscription
+          // only create account if they want to save a quopte.
+          const isAnonymous = user.isAnonymous;
+          const uid = user.uid;
+          // payload.token should be uid.
+          // add expo pushtoken in users state (?)
+
+          setUserForm.setSubscriptionIsOn(true);
+          registerForPushNotificationsAsync({
+            userNotificationRequest: {
+              ...userForm,
+              subscriptionIsOn: true
+            },
+          onSuccess: () => {
+            setScreen("home");
+            props.refetchUserSettings();
+          }
+      });
+        } else {
+        console.warn('Noo user hombrero');
+        
+        }
+      });
+  })
+  .catch(function(error) {
+    // Handle Errors here.
+    const errorCode = error.code;
+    const errorMessage = error.message;
+    console.warn(errorMessage);
+    
+    // ...
+  })
+
+  //-------------------------------------------------
     //optimistc update, remember to handle errors.
     setUserForm.setSubscriptionIsOn(true);
     registerForPushNotificationsAsync({
@@ -90,6 +130,20 @@ export default function Root() {
   >(undefined);
 
   //TODO set firebase subscription instead of fetchUserSettings
+
+  // firebase.auth().onAuthStateChanged(function(user) {
+  //   if (user) {
+  //     console.warn('WTF?');
+  //     // User is signed in.
+  //     const isAnonymous = user.isAnonymous;
+  //     const uid = user.uid;
+
+  //   } else {
+  //    console.warn('Noo user hombrero');
+     
+  //   }
+  // });
+  
   const fetchUserSettings = React.useCallback(() => {
     getUserNotificationSettings()
       .then(userSettings => {
